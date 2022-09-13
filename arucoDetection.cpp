@@ -61,7 +61,7 @@ void openCam() {
     }
 }
 
-void cameraCalivration(vector<Mat> images, Size boardSize, float squareEdgeLength, Mat& cameraMatrix, Mat& distanceCoefficients) {
+void cameraCalibration(vector<Mat> images, Size boardSize, float squareEdgeLength, Mat& cameraMatrix, Mat& distanceCoefficients) {
     vector<vector<Point2f>> chessboardImageSpacePoints;
     getChessboardCornersFromImages(images, chessboardImageSpacePoints, false);
 
@@ -122,7 +122,8 @@ bool loadCameraCalibration(string name, Mat& cameraMatrix, Mat& distanceCoeffici
                 cout << cameraMatrix.at<double>(r, c) << "\n";
             }
         }
-
+		inStream >> rows;
+        inStream >> cols;
         distanceCoefficients = Mat::zeros(rows, cols, CV_64F);
         cout << "distanceCoefficients : \n";
         for (int r = 0; r < rows; r++) {
@@ -130,7 +131,7 @@ bool loadCameraCalibration(string name, Mat& cameraMatrix, Mat& distanceCoeffici
                 double read = 0.0f;
                 inStream >> read;
                 distanceCoefficients.at<double>(r, c) = read;
-                cout << cameraMatrix.at<double>(r, c) << "\n";
+                cout << distanceCoefficients.at<double>(r, c) << "\n";
             }
         }
         inStream.close();
@@ -152,23 +153,29 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
 
     if (!vid.isOpened()) return -1;
     namedWindow("Cam");
-    //std::vector<cv::Vec3d> rotationVectors, translationVectors;
-    Mat rotationVectors, translationVectors;
+    std::vector<cv::Vec3d> rotationVectors, translationVectors;
+    // vector<> rotationVectors, translationVectors;
     cout << "start monitring \n";
     while (vid.read(frame)) {
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
         cout << markerIds.size();
-        for (int i = 0; i < markerIds.size(); i++) {
-            cout << "Marker ID : " << markerIds.at(i);
-        }
         for (int i = 0; i < markerIds.size(); i++){
-            drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors, arucoSquareDimension, 0.1);
+            drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors, arucoSquareDimension);
+			// aruco::drawDetectedMarkers(frame,  markerCorners, markerIds);
         }
         imshow("Cam", frame);
         if (waitKey(30) > 0) break;
     }
     return 1;   
+}
+bool readCameraParameters(string filename, Mat &camMatrix, Mat &distCoeffs) {
+    FileStorage fs(filename, FileStorage::READ);
+    if(!fs.isOpened())
+        return false;
+    fs["camera_matrix"] >> camMatrix;
+    fs["distortion_coefficients"] >> distCoeffs;
+    return true;
 }
 void startCameraCalibration() {
     Mat frame;
@@ -223,7 +230,7 @@ void startCameraCalibration() {
         case 13:
             if (saveImages.size() > 15) {
                 cout << "calculating" << endl;
-                cameraCalivration(saveImages, chessboardDimensions, calibrationSquareDimension, cameraMatrix, distanceCoefficients);
+                cameraCalibration(saveImages, chessboardDimensions, calibrationSquareDimension, cameraMatrix, distanceCoefficients);
                 cout << "saving" << endl;
                 saveCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
                 cout << "end saving" << endl;
@@ -243,7 +250,7 @@ void startCameraCalibration() {
 int main(int argc, char** argv)
 {   
     Mat cameraMatrix, distanceCoefficients;
-    loadCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
+    readCameraParameters("s.yml", cameraMatrix, distanceCoefficients);
     startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension);
     //Mat img = imread("marker.png");
     //imshow("test", img);

@@ -4,6 +4,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
+//#include <opencv2/calib3d.hpp>
 
 using namespace cv;
 using namespace std;
@@ -88,16 +89,11 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
     if (!vid.isOpened()) return -1;
     namedWindow("Cam");
     std::vector<cv::Vec3d> rotationVectors, translationVectors;
-    cout << "start monitring \n";
     while (vid.read(frame)) {
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
-        cout << markerIds.size();
-        for (int i = 0; i < markerIds.size(); i++) {
-            cout << "Marker ID : " << markerIds.at(i);
-        }
         for (int i = 0; i < markerIds.size(); i++){
-            drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension, 0.1);
+            drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension);
         }
         imshow("Cam", frame);
         if (waitKey(30) > 0) break;

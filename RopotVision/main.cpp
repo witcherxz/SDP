@@ -121,7 +121,7 @@ static void saveCameraCalibration(const string& filename,const Mat& cameraMatrix
 {
     FileStorage fs(filename, FileStorage::WRITE);
 
-    //time_t tt;
+
     //time(&tt);
     //struct tm* t2 = localtime(&tt);
     //char buf[1024];

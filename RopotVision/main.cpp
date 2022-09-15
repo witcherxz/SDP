@@ -4,13 +4,15 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
+#include <math.h>
 //#include <opencv2/calib3d.hpp>
+
 
 using namespace cv;
 using namespace std;
 // TODO: Add the measurement for the calibration board cell and the aruco measurement
-const float calibrationSquareDimension = 0.0239f; // in meter
-const float arucoDimension = 0.133f; // in meter
+const float calibrationSquareDimension = 0.025f; // in meter
+const float arucoDimension = 0.186f; // in meter
 const Size chessboardDimensions = Size(6, 9);
 
 void createArucoMarkers(cv::aruco::PREDEFINED_DICTIONARY_NAME name, string path) {
@@ -77,12 +79,12 @@ void cameraCalivration(vector<Mat> images, Size boardSize, float squareEdgeLengt
 
 }
 
-int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,float arucoSquareDimension) {
+int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,float arucoSquareDimension, aruco::PREDEFINED_DICTIONARY_NAME dictionaryName) {
     Mat frame;
 
     vector<int> markerIds;
     vector<vector<Point2f>> markerCorners, rejectedCandidates;
-    Ptr<aruco::Dictionary> markerDictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME::DICT_4X4_50);
+    Ptr<aruco::Dictionary> markerDictionary = aruco::getPredefinedDictionary(dictionaryName);
 
     VideoCapture vid(0);
 
@@ -93,12 +95,27 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
         for (int i = 0; i < markerIds.size(); i++){
+            // ostringstream x;
             drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension);
+            
         }
+            if(translationVectors.size() > 0){
+                ostringstream distance;
+                distance << "distance : " <<  translationVectors[0];
+                putText(frame, distance.str(), Point2i(10, frame.cols - 200), FONT_HERSHEY_COMPLEX, .7, Scalar(0, 255, 0));
+            }
+            //cout << "Dist : " << (translationVectors.at(2) * 100) << " cm";
+            //cout << "Rot : " << (rotationVectors.at(2) / 3.14159265358979323846f * 180) << "deg";
         imshow("Cam", frame);
         if (waitKey(30) > 0) break;
     }
+    FileStorage fs("aruco rotation and translation.json", FileStorage::Mode::WRITE);
+    fs << "rotation";
+    fs << rotationVectors;
+    fs << "translation";
+    fs << translationVectors;
     return 1;   
+
 }
 static void saveCameraCalibration(const string& filename,const Mat& cameraMatrix, const Mat& distCoeffs)
 {
@@ -140,12 +157,12 @@ void startCameraCalibration() {
     if (!vid.isOpened()) return;
 
     int framesPerSecond = 20;
-    namedWindow("Instruction", WINDOW_AUTOSIZE);
+    // namedWindow("Instruction", WINDOW_AUTOSIZE);
     namedWindow("Cam", WINDOW_AUTOSIZE);
-    Mat instImage = imread("calibrationInstruction.png");
+    // Mat instImage = imread("calibrationInstruction.png");
     int imagesCounter = 0;
 
-    imshow("Instruction", instImage);
+    // imshow("Instruction", instImage);
     while (vid.read(frame)) {
         vector<Vec2f> foundPoints;
         bool isFound = false;
@@ -196,10 +213,8 @@ void startCameraCalibration() {
 int main(int argc, char** argv)
 {   
     Mat cameraMatrix, distanceCoefficients;
-    startCameraCalibration();
-    //loadCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
-    //startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension);
-    //Mat img = imread("marker.png");
-    //imshow("test", img);
+    // startCameraCalibration();
+    loadCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
+    startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension, aruco::DICT_5X5_100);
     return 0;
 }

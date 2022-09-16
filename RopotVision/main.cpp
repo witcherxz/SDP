@@ -97,7 +97,6 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
         for (int i = 0; i < markerIds.size(); i++){
             // ostringstream x;
             drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension);
-            
         }
             if(translationVectors.size() > 0){
                 ostringstream distance;
@@ -109,11 +108,6 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
         imshow("Cam", frame);
         if (waitKey(30) > 0) break;
     }
-    FileStorage fs("aruco rotation and translation.json", FileStorage::Mode::WRITE);
-    fs << "rotation";
-    fs << rotationVectors;
-    fs << "translation";
-    fs << translationVectors;
     return 1;   
 
 }

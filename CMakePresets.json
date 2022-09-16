@@ -7,12 +7,15 @@
     },
     "configurePresets": [
       {
-        "name": "WindowsRobotLocalization",
-        "displayName": "Windows Robot Localization",
-        "description": "Windows debug build",
+        "name": "windows-default",
+        "displayName": "Windows default configuration",
+        "description": "windows x64 Visual Studio 17 2022 configuration",
         "generator": "Visual Studio 17 2022",
         "binaryDir": "${sourceDir}/build",
-        
+        "architecture": {
+          "value": "x64",
+          "strategy": "external"
+        },
         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug"
         },
@@ -20,9 +23,9 @@
         }
       },
       {
-        "name": "LinuxRobotLocalization",
-        "displayName": "Linux Robot Localization",
-        "description": "linux debug build",
+        "name": "linux-default",
+        "displayName": "Linux default configuration",
+        "description": "Unix Makefiles configuration",
         "generator": "Unix Makefiles",
         "binaryDir": "${sourceDir}/build",
         

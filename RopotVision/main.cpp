@@ -12,7 +12,7 @@ using namespace cv;
 using namespace std;
 // TODO: Add the measurement for the calibration board cell and the aruco measurement
 const float calibrationSquareDimension = 0.025f; // in meter
-const float arucoDimension = 0.14f; // in meter
+const float arucoDimension = 0.186f; // in meter
 const Size chessboardDimensions = Size(6, 9);
 
 void createArucoMarkers(cv::aruco::PREDEFINED_DICTIONARY_NAME name, string path) {

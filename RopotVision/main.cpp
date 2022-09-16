@@ -209,6 +209,6 @@ int main(int argc, char** argv)
     Mat cameraMatrix, distanceCoefficients;
     // startCameraCalibration();
     loadCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
-    startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension, aruco::DICT_5X5_100);
+    startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension, aruco::DICT_6X6_1000);
     return 0;
 }

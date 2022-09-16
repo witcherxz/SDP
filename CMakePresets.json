@@ -23,7 +23,7 @@
         "name": "LinuxRobotLocalization",
         "displayName": "Linux Robot Localization",
         "description": "linux debug build",
-        "generator": "UNIX Makefiles",
+        "generator": "Unix Makefiles",
         "binaryDir": "${sourceDir}/build",
         
         "cacheVariables": {

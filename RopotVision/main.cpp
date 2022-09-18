@@ -5,6 +5,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
 #include <math.h>
+#include "map.cpp"
 //#include <opencv2/calib3d.hpp>
 
 
@@ -63,7 +64,7 @@ void openCam() {
     }
 }
 
-void cameraCalivration(vector<Mat> images, Size boardSize, float squareEdgeLength, Mat& cameraMatrix, Mat& distanceCoefficients) {
+void cameraCalibration(vector<Mat> images, Size boardSize, float squareEdgeLength, Mat& cameraMatrix, Mat& distanceCoefficients) {
     vector<vector<Point2f>> chessboardImageSpacePoints;
     getChessboardCornersFromImages(images, chessboardImageSpacePoints, false);
 
@@ -75,8 +76,6 @@ void cameraCalivration(vector<Mat> images, Size boardSize, float squareEdgeLengt
     distanceCoefficients = Mat::zeros(8, 1, CV_16F);
 
     calibrateCamera(realWorldSpacePoints, chessboardImageSpacePoints, boardSize, cameraMatrix, distanceCoefficients, rVector, tVector);
-
-
 }
 
 int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,float arucoSquareDimension, aruco::PREDEFINED_DICTIONARY_NAME dictionaryName) {
@@ -91,9 +90,16 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
     if (!vid.isOpened()) return -1;
     namedWindow("Cam");
     std::vector<cv::Vec3d> rotationVectors, translationVectors;
+    BasicMap map(10, 5, 1);
+    map.drawMap(2);
+    float f = 0.5f;
+    float x = 2.0f;
+    float y = 0.2f;
     while (vid.read(frame)) {
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
+
+        map.updatePostion( x, y+=f);
         for (int i = 0; i < markerIds.size(); i++){
             // ostringstream x;
             drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension);
@@ -103,14 +109,14 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
                 distance << "distance : " <<  translationVectors[0];
                 putText(frame, distance.str(), Point2i(10, frame.cols - 200), FONT_HERSHEY_COMPLEX, .7, Scalar(0, 255, 0));
             }
-            //cout << "Dist : " << (translationVectors.at(2) * 100) << " cm";
-            //cout << "Rot : " << (rotationVectors.at(2) / 3.14159265358979323846f * 180) << "deg";
+
         imshow("Cam", frame);
-        if (waitKey(30) > 0) break;
+        if (waitKey(400) > 0) break;
     }
     return 1;   
 
 }
+
 static void saveCameraCalibration(const string& filename,const Mat& cameraMatrix, const Mat& distCoeffs)
 {
     FileStorage fs(filename, FileStorage::WRITE);
@@ -181,7 +187,7 @@ void startCameraCalibration() {
         case 13:
             if (saveImages.size() > 15) {
                 cout << "calculating" << endl;
-                cameraCalivration(saveImages, chessboardDimensions, calibrationSquareDimension, cameraMatrix, distanceCoefficients);
+                cameraCalibration(saveImages, chessboardDimensions, calibrationSquareDimension, cameraMatrix, distanceCoefficients);
                 cout << "saving" << endl;
                 saveCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
                 cout << "end saving" << endl;

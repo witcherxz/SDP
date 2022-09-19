@@ -11,15 +11,15 @@
 #define COLOR_GREEN 2
 class Map {
     public:    
-        Map(int hight , int width, int cellSize){
+        Map(double hight , double width, double cellSize){
             this->width = width;
             this->hight = hight;
             this->cellSize = cellSize;
-            map = cv::Mat(hight / cellSize, width / cellSize, CV_8U);
-            frame = cv::Mat(hight * scale, width * scale, CV_8UC3, cv::Scalar(255, 255, 255));
+            map = cv::Mat(int(hight / cellSize), int(width / cellSize), CV_8U);
+            frame = cv::Mat(int(hight * scale), int(width * scale), CV_8UC3, cv::Scalar(255, 255, 255));
         }
         void updatePostion(double x, double y){
-            float factor = 1.0f / ((float) cellSize);
+            double factor = 1.0 / cellSize;
             drawPoint(cx, cy, COLOR_WHITE);
             cx = (int) floor(x * factor);
             cy = (int) floor(y * factor);
@@ -32,30 +32,35 @@ class Map {
     protected:
         cv::Mat map;            // map matrix
         cv::Mat frame;          // map matrix
-        int width;              // width of the map in meter
-        int hight;              // hight of the map in meter
-        int cellSize;           // size of each cell of the matrix in meter
+        double width;              // width of the map in meter
+        double hight;              // hight of the map in meter
+        double cellSize;           // size of each cell of the matrix in meter
         int cx = 0;             // current x postion
         int cy = 0;             // current y postion
         const int padding = 20; // window padding
-        const int scale = 50;   // map scale
+        const int scale = 30;   // map scale
 
-        void drawPoint(int x, int y, int flag){
+        void drawPoint(double x, double y, int flag){
         uint8_t r = ((flag & 4) >> 2) * 255;
         uint8_t g = ((flag & 2) >> 1) * 255;
         uint8_t b = (flag & 1) * 255;
-        cv::circle(this->frame, cv::Point2i(x * scale, y * scale), 0, cv::Scalar(b, g, r), 15);
+
+        // cv::circle(this->frame, cv::Point2i(int(x * scale), int(y * scale)), 0, cv::Scalar(b, g, r), 15);
+        cv::circle(this->frame, cv::Point2i(0 * scale, 0 * scale), 0, cv::Scalar(b, g, r), 15);
+        cv::circle(this->frame, cv::Point2i(4 * scale, 4 * scale), 0, cv::Scalar(b, g, r), 15);
+        cv::circle(this->frame, cv::Point2i(int(x * scale), int(y * scale)), 0, cv::Scalar(b, g, r), 15);
         }
 };
 
 class BasicMap: public Map{
     
     public:
-        BasicMap(int hight, int width, int cellSize) : Map(hight, width, cellSize){
+        BasicMap(double hight, double width, double cellSize) : Map(hight, width, cellSize){
             // std::cout << "Map is created";
         }
         void drawMap(int thickness){
             // std::cout << "Enter Draw Map \n";
+
             int h = hight * scale;
             int w = width * scale;
             cv::Mat frame(h, w, CV_8UC3, cv::Scalar(255, 255, 255));

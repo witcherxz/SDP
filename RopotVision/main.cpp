@@ -90,20 +90,24 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
     if (!vid.isOpened()) return -1;
     namedWindow("Cam");
     std::vector<cv::Vec3d> rotationVectors, translationVectors;
-    BasicMap map(10, 5, 1);
+    BasicMap map(30, 10, 0.4);
     map.drawMap(2);
     float f = 0.5f;
-    float x = 2.0f;
+    float x = 1.0f;
     float y = 0.2f;
+    int arucoXPos = 4;
+    int arucoYPos = 7;
     while (vid.read(frame)) {
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
 
-        map.updatePostion( x, y+=f);
         for (int i = 0; i < markerIds.size(); i++){
             // ostringstream x;
             drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], arucoSquareDimension);
         }
+        
+        if(translationVectors.size() != 0)
+            map.updatePostion( arucoXPos - translationVectors[0][2], arucoYPos - translationVectors[0][1]);
             if(translationVectors.size() > 0){
                 ostringstream distance;
                 distance << "distance : " <<  translationVectors[0];

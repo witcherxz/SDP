@@ -21,8 +21,10 @@ class Map {
         void updatePostion(double x, double y){
             double factor = 1.0 / cellSize;
             drawPoint(cx, cy, COLOR_WHITE);
-            cx = (int) floor(x * factor);
-            cy = (int) floor(y * factor);
+            // cx = (int) floor(x * factor);
+            // cy = (int) floor(y * factor);
+            cx = x;
+            cy = y;
             drawPoint(cx, cy, COLOR_RED);            
             cv::imshow("test", this->frame);
         }
@@ -44,10 +46,7 @@ class Map {
         uint8_t r = ((flag & 4) >> 2) * 255;
         uint8_t g = ((flag & 2) >> 1) * 255;
         uint8_t b = (flag & 1) * 255;
-
-        // cv::circle(this->frame, cv::Point2i(int(x * scale), int(y * scale)), 0, cv::Scalar(b, g, r), 15);
-        cv::circle(this->frame, cv::Point2i(0 * scale, 0 * scale), 0, cv::Scalar(b, g, r), 15);
-        cv::circle(this->frame, cv::Point2i(4 * scale, 4 * scale), 0, cv::Scalar(b, g, r), 15);
+        // std::cout << "x : " << int (x) << " y = " << int(y) << "\n";
         cv::circle(this->frame, cv::Point2i(int(x * scale), int(y * scale)), 0, cv::Scalar(b, g, r), 15);
         }
 };

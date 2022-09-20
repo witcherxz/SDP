@@ -13,7 +13,7 @@ using namespace cv;
 using namespace std;
 // TODO: Add the measurement for the calibration board cell and the aruco measurement
 const float calibrationSquareDimension = 0.025f; // in meter
-const float arucoDimension = 0.186f; // in meter
+const float arucoDimension = 0.14f; // in meter
 const Size chessboardDimensions = Size(6, 9);
 
 void createArucoMarkers(cv::aruco::PREDEFINED_DICTIONARY_NAME name, string path) {
@@ -96,7 +96,7 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
     float x = 1.0f;
     float y = 0.2f;
     int arucoXPos = 4;
-    int arucoYPos = 7;
+    int arucoYPos = 6;
     while (vid.read(frame)) {
         aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors);
@@ -107,7 +107,7 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
         }
         
         if(translationVectors.size() != 0)
-            map.updatePostion( arucoXPos - translationVectors[0][2], arucoYPos - translationVectors[0][1]);
+            map.updatePostion( arucoXPos - translationVectors[0][0], arucoYPos + translationVectors[0][1]);
             if(translationVectors.size() > 0){
                 ostringstream distance;
                 distance << "distance : " <<  translationVectors[0];
@@ -115,7 +115,7 @@ int startCamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficients,
             }
 
         imshow("Cam", frame);
-        if (waitKey(400) > 0) break;
+        if (waitKey(10) > 0) break;
     }
     return 1;   
 
@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 {   
     Mat cameraMatrix, distanceCoefficients;
     // startCameraCalibration();
-    loadCameraCalibration("cameraCalibration", cameraMatrix, distanceCoefficients);
+    loadCameraCalibration("C:\\Users\\Turki\\Desktop\\ENG\\EE499\\SDP\\RopotVision\\cameraCalibration", cameraMatrix, distanceCoefficients);
     startCamMonitoring(cameraMatrix, distanceCoefficients, arucoDimension, aruco::DICT_6X6_1000);
     return 0;
 }

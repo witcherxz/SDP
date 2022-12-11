@@ -26,7 +26,7 @@ class Map {
             cx = x;
             cy = y;
             drawPoint(cx, cy, COLOR_RED);            
-            cv::imshow("test", this->frame);
+            cv::imshow("map", this->frame);
         }
         virtual void drawMap(int thickness) = 0;
         // virtual void drawPosition(cv::Mat img) = 0;
@@ -52,12 +52,19 @@ class Map {
 };
 
 class BasicMap: public Map{
-    
+
+    void drawMapBorders(int thickness, cv::Point2i &p0, cv::Point2i &p1, cv::Point2i &p2, cv::Point2i &p3) const {
+        cv::line(frame, p0, p1, cv::Scalar(0, 0, 0), thickness);
+        cv::line(frame, p1, p2, cv::Scalar(0, 0, 0), thickness);
+        cv::line(frame, p2, p3, cv::Scalar(0, 0, 0), thickness);
+        cv::line(frame, p3, p0, cv::Scalar(0, 0, 0), thickness);
+    }
+
     public:
         BasicMap(double hight, double width, double cellSize) : Map(hight, width, cellSize){
-            // std::cout << "Map is created";
         }
-        void drawMap(int thickness){
+
+    void drawMap(int thickness){
             // std::cout << "Enter Draw Map \n";
 
             int h = hight * scale;
@@ -68,14 +75,11 @@ class BasicMap: public Map{
             cv::Point2i p1 = cv::Point2i(padding, h - padding);
             cv::Point2i p2 = cv::Point2i( w - padding, h - padding);
             cv::Point2i p3 = cv::Point2i( w - padding, padding);
-            
-            cv::line(this->frame, p0, p1, cv::Scalar(0, 0,0), thickness);
-            cv::line(this->frame, p1, p2, cv::Scalar(0, 0,0), thickness);
-            cv::line(this->frame, p2, p3, cv::Scalar(0, 0,0), thickness);
-            cv::line(this->frame, p3, p0, cv::Scalar(0, 0,0), thickness);
-            // this->this->frame = this->frame;
-            cv::namedWindow("test");
-            cv::imshow("test", this->frame)
+
+        drawMapBorders(thickness, p0, p1, p2, p3);
+        // this->this->frame = this->frame;
+            cv::namedWindow("map");
+            cv::imshow("map", this->frame)
             ;
 
         }

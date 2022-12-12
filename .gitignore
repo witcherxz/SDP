@@ -33,5 +33,6 @@
 
 # build files
 .*/
+cmake*/
 /build
 /.vscode

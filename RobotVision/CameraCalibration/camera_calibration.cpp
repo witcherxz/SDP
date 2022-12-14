@@ -17,7 +17,8 @@ void createKnownBoardPosition(Size boardSize, float squareEdgeLength, vector<Poi
     }
 }
 
-void getChessboardCornersFromImages(vector<Mat> images, vector<vector<Point2f>> &allFoundCorners, bool showCorners = false) {
+void
+getChessboardCornersFromImages(vector<Mat> images, vector<vector<Point2f>> &allFoundCorners, bool showCorners = false) {
     for (vector<Mat>::iterator itr = images.begin(); itr != images.end(); itr++) {
         vector<Point2f> pointBuf;
         bool chessBoardFound = findChessboardCorners(*itr, constants::chessboardDimensions, pointBuf,
@@ -79,8 +80,8 @@ void calibrateCameraFromSavedImages(Mat &cameraMatrix, Mat &distortionCoefficien
 }
 
 void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoefficients, vector<Mat> &saveImages,
-                      int &imagesCounter, bool isChessboardFound) {
-    
+                       int &imagesCounter, bool isChessboardFound) {
+
     switch (waitKey(0)) {
         case ' ':
             if (isChessboardFound) {
@@ -117,11 +118,11 @@ void startCameraCalibration() {
     while (vid.read(frame)) {
         vector<Vec2f> foundPoints;
         bool isFound = findChessboardCorners(frame, constants::chessboardDimensions, foundPoints,
-                                        CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+                                             CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
         showNumberOfImagesTaken(frame, imagesCounter);
         drawChessboardCorners(frame, constants::chessboardDimensions, foundPoints, isFound);
         imshow("Cam", frame);
-        executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter,isFound);
+        executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter, isFound);
     }
 }
 

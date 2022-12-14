@@ -8,24 +8,19 @@
 #include "CameraCalibration/camera_calibration.h"
 #include "opencv_constants.h"
 
-void showCamErrorMassage()
-{
+void showCamErrorMassage() {
     std::cout << "Error : Could not open camera";
     exit(1);
 }
 
-void monitorCamera(cv::Mat frame, cv::VideoCapture vid, const std::function<void()> &func)
-{
-    while (vid.read(frame))
-    {
+void monitorCamera(cv::Mat frame, cv::VideoCapture vid, const std::function<void()> &func) {
+    while (vid.read(frame)) {
         func();
     }
 }
 
-void showTranslationInfo(const cv::Mat &frame, const std::vector<cv::Vec3d> &translationVectors)
-{
-    if (translationVectors.size() > 0)
-    {
+void showTranslationInfo(const cv::Mat &frame, const std::vector<cv::Vec3d> &translationVectors) {
+    if (translationVectors.size() > 0) {
         std::ostringstream distance;
         distance << "distance : " << translationVectors[0];
         putText(frame, distance.str(), cv::Point2i(10, frame.cols - 200), cv::FONT_HERSHEY_COMPLEX, .7,
@@ -33,28 +28,24 @@ void showTranslationInfo(const cv::Mat &frame, const std::vector<cv::Vec3d> &tra
     }
 }
 
-void updatePositionOnMap(int arucoXPos, int arucoYPos, const std::vector<cv::Vec3d> &translationVectors, BasicMap &map)
-{
-    if (!translationVectors.empty())
-    {
+void
+updatePositionOnMap(int arucoXPos, int arucoYPos, const std::vector<cv::Vec3d> &translationVectors, BasicMap &map) {
+    if (!translationVectors.empty()) {
         map.changePointPosition(arucoXPos - translationVectors[0][0], arucoYPos + translationVectors[0][1]);
     }
 }
 
 void drawMarkersOnFrame(const cv::Mat &frame, const cv::Mat &distanceCoefficients, const cv::Mat &cameraMatrix,
-                         const std::vector<int> &markerIds, const std::vector<cv::Vec3d> &rotationVectors,
-                         const std::vector<cv::Vec3d> &translationVectors)
-{
-    for (int i = 0; i < markerIds.size(); i++)
-    {
+                        const std::vector<int> &markerIds, const std::vector<cv::Vec3d> &rotationVectors,
+                        const std::vector<cv::Vec3d> &translationVectors) {
+    for (int i = 0; i < markerIds.size(); i++) {
         // ostringstream x;
         drawFrameAxes(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i],
                       constants::arucoSquareDimension);
     }
 }
 
-void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, const cv::Mat &cameraMatrix)
-{
+void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, const cv::Mat &cameraMatrix) {
     int arucoXPos = 4;
     int arucoYPos = 6;
     std::vector<int> markerIds;
@@ -68,10 +59,10 @@ void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, c
     BasicMap map(30, 10, 0.4);
 
     map.drawMap();
-    while (vid.read(frame))
-    {
+    while (vid.read(frame)) {
         cv::aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
-        cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors);
+        cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix,
+                                             distortionCoefficients, rotationVectors, translationVectors);
         drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
         updatePositionOnMap(arucoXPos, arucoYPos, translationVectors, map);
         showTranslationInfo(frame, translationVectors);
@@ -81,8 +72,7 @@ void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, c
     }
 }
 
-void startCamMonitoring(std::string cameraCalibrationPath)
-{
+void startCamMonitoring(std::string cameraCalibrationPath) {
     cv::Mat cameraMatrix, distortionCoefficients;
     cv::Mat frame;
     loadCameraCalibration(cameraCalibrationPath, cameraMatrix, distortionCoefficients);

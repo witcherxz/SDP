@@ -6,8 +6,7 @@
 #include <opencv2/highgui.hpp>
 #include <math.h>
 
-namespace constants
-{
+namespace constants {
     extern const float calibrationSquareDimension = 0.025f; // in meter
     extern const float arucoSquareDimension = 0.14f; // in meter
     extern const cv::Size chessboardDimensions = cv::Size(6, 9);

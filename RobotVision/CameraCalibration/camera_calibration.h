@@ -3,7 +3,7 @@
 #ifndef ROBOTVISION_CAMERACALIBRATION_H
 #define ROBOTVISION_CAMERACALIBRATION_H
 
-bool loadCameraCalibration(std::string filename, cv::Mat &camMatrix, cv::Mat &distCoeffs);
+bool loadCameraCalibration(std::string path, cv::Mat &camMatrix, cv::Mat &distCoeffs);
 void startCameraCalibration();
 
 #endif // ROBOTVISION_CAMERACALIBRATION_H

@@ -2,5 +2,5 @@
 
 #if !defined(SDP_ROBOTVISION_ARUCOPOSEESTEMATION_H)
 #define SDP_ROBOTVISION_ARUCOPOSEESTEMATION_H
-void startCamMonitoring(const cv::Mat &cameraMatrix, const cv::Mat &distanceCoefficients);
+void startCamMonitoring(std::string cameraCalibrationPath);
 #endif // SDP_ROBOTVISION_ARUCOPOSEESTEMATION_H

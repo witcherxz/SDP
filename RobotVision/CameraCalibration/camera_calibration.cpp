@@ -54,8 +54,8 @@ static void saveCameraCalibration(const string &filename, const Mat &cameraMatri
 }
 
 
-bool loadCameraCalibration(string filename, Mat &camMatrix, Mat &distCoeffs) {
-    FileStorage fs(filename, FileStorage::READ);
+bool loadCameraCalibration(string path, Mat &camMatrix, Mat &distCoeffs) {
+    FileStorage fs(path, FileStorage::READ);
     if (!fs.isOpened())
         return false;
     fs["camera_matrix"] >> camMatrix;

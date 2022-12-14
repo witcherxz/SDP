@@ -5,6 +5,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
 #include "map.cpp"
+#include "CameraCalibration/camera_calibration.h"
 #include "opencv_constants.h"
 
 void showCamErrorMassage()
@@ -80,8 +81,10 @@ void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, c
     }
 }
 
-void startCamMonitoring(const cv::Mat &cameraMatrix, const cv::Mat &distanceCoefficients)
+void startCamMonitoring(std::string cameraCalibrationPath)
 {
+    cv::Mat cameraMatrix, distortionCoefficients;
     cv::Mat frame;
-    monitorArucoMarkers(frame, distanceCoefficients, cameraMatrix);
+    loadCameraCalibration(cameraCalibrationPath, cameraMatrix, distortionCoefficients);
+    monitorArucoMarkers(frame, distortionCoefficients, cameraMatrix);
 }

@@ -4,9 +4,8 @@
 #include "aruco_scanner.h"
 
 int main(int argc, char **argv) {
-    cv::Mat cameraMatrix, distortionCoefficients;
+
 //    startCameraCalibration();
-     loadCameraCalibration("C:\\Users\\Legend\\Desktop\\SDP\\SDP\\RobotVision\\cameraCalibration", cameraMatrix, distortionCoefficients);
-     startCamMonitoring(cameraMatrix, distortionCoefficients);
+     startCamMonitoring("C:\\Users\\Legend\\Desktop\\SDP\\SDP\\RobotVision\\cameraCalibration");
     return 0;
 }

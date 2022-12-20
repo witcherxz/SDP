@@ -13,12 +13,12 @@ void MapCreator::addLine(Line line) {
     std::tie(ex, ey) = ep.getCoordinate();
     if (sx == ex) {
         for(int i = sy; i <= ey; i++){
-            map.occupyCell(sx, i);
+            map.occupyCell(i, sx);
         }
     }
     if (sy == ey) {
         for(int i = sx; i <= ex; i++){
-            map.occupyCell(i, sy);
+            map.occupyCell(sy, i);
         }
     }
 }

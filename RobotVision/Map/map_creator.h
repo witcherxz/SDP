@@ -6,6 +6,7 @@
 class MapCreator {
 private:
     GridMap map;
+
 public:
     MapCreator(GridMap map);
 

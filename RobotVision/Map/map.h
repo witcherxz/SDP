@@ -17,11 +17,13 @@ public:
 
     Point(double x, double y);
 
-    std::tuple<double, double> getCoordinate();
+    bool operator ==(const Point& other) const;
+
+    std::tuple<double, double> getCoordinate() const;
 
     void setCoordinate(double x, double y);
 
-    double length(Point other);
+    double length(const Point& other) const;
 
 };
 
@@ -56,6 +58,7 @@ private:
     double width;
     double height;
     double cellSize;
+    void checkBounders(int r, int c);
 public:
     GridMap(double height, double width, double cellSize);
 
@@ -64,6 +67,12 @@ public:
     std::tuple<double, double> getDimensions();
 
     void occupyCell(int r, int c);
+
+    void freeCell(int r, int c);
+
+    bool isFree(int r, int c);
+
+    cv::Mat getMapCopy();
 
     void print();
 };

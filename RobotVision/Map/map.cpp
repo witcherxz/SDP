@@ -9,13 +9,17 @@ void Point::setCoordinate(double x, double y)
     this->y = y;
 }
 
-double Point::length(Point other)
+double Point::length(const Point& other) const
 {
     return sqrt(pow(other.x - this->x, 2) + pow(other.y - this->y, 2));
 }
 
-std::tuple<double, double> Point::getCoordinate(){
+std::tuple<double, double> Point::getCoordinate() const{
     return std::make_tuple(x, y);
+}
+
+bool Point::operator==(const Point& other) const{
+    return this->x == other.x && this->y == other.y;
 }
 
 Line::Line(Point sp, Point ep)
@@ -63,10 +67,30 @@ std::tuple<double, double> GridMap::getDimensions(){
     return std::make_tuple(width, height);
 }
 
+void GridMap::checkBounders(int r, int c){
+    assert(r >= 0 && r < width && c >= 0 && c < height);
+}
+
 void GridMap::occupyCell(int r, int c){
+    checkBounders(r, c);
     map.at<char>(r, c) = OCCUPIED;
+}
+
+void GridMap::freeCell(int r, int c){
+    checkBounders(r, c);
+    map.at<char>(r, c) = FREE;
+}
+
+
+cv::Mat GridMap::getMapCopy(){
+    return map.clone();
 }
 
 void GridMap::print(){
     std::cout << "Map = \n" << map << ";" << std::endl << std::endl;
+}
+
+bool GridMap::isFree(int r, int c){
+    checkBounders(r, c);
+    return map.at<uchar>(r, c) == FREE;
 }

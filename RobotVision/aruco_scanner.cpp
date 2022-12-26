@@ -4,7 +4,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
-#include "map.cpp"
+#include "Map/map.h"
 #include "CameraCalibration/camera_calibration.h"
 #include "opencv_constants.h"
 
@@ -19,21 +19,21 @@ void monitorCamera(cv::Mat frame, cv::VideoCapture vid, const std::function<void
     }
 }
 
-void showTranslationInfo(const cv::Mat &frame, const std::vector<cv::Vec3d> &translationVectors) {
+void showTranslationInfo(const cv::Mat &frame, const std::vector<cv::Vec3d> &translationVectors, int id) {
     if (translationVectors.size() > 0) {
         std::ostringstream distance;
-        distance << "distance : " << translationVectors[0];
+        distance << "ID: " << id << ", distance : " << translationVectors[0];
         putText(frame, distance.str(), cv::Point2i(10, frame.cols - 200), cv::FONT_HERSHEY_COMPLEX, .7,
                 cv::Scalar(0, 255, 0));
     }
 }
 
-void
-updatePositionOnMap(int arucoXPos, int arucoYPos, const std::vector<cv::Vec3d> &translationVectors, BasicMap &map) {
-    if (!translationVectors.empty()) {
-        map.changePointPosition(arucoXPos - translationVectors[0][0], arucoYPos + translationVectors[0][1]);
-    }
-}
+// void
+// updatePositionOnMap(int arucoXPos, int arucoYPos, const std::vector<cv::Vec3d> &translationVectors, GridMap &map) {
+//     if (!translationVectors.empty()) {
+//         map.changeCurrentPosition(map.,arucoXPos - translationVectors[0][0], arucoYPos + translationVectors[0][1]);
+//     }
+// }
 
 void drawMarkersOnFrame(const cv::Mat &frame, const cv::Mat &distanceCoefficients, const cv::Mat &cameraMatrix,
                         const std::vector<int> &markerIds, const std::vector<cv::Vec3d> &rotationVectors,
@@ -56,16 +56,18 @@ void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, c
     cv::namedWindow("Cam");
     if (!vid.isOpened())
         showCamErrorMassage();
-    BasicMap map(30, 10, 0.4);
+    GridMap map(30, 10, 0.4);
 
-    map.drawMap();
+    // map.drawMap();
     while (vid.read(frame)) {
         cv::aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
         cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix,
                                              distortionCoefficients, rotationVectors, translationVectors);
         drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
-        updatePositionOnMap(arucoXPos, arucoYPos, translationVectors, map);
-        showTranslationInfo(frame, translationVectors);
+        // updatePositionOnMap(arucoXPos, arucoYPos, translationVectors, map);
+        if(markerIds.size() != 0){
+            showTranslationInfo(frame, translationVectors, markerIds[0]);
+        }
         imshow("Cam", frame);
         if (cv::waitKey(10) > 0)
             break;

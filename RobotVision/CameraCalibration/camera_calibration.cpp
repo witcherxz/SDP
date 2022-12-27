@@ -107,14 +107,14 @@ void calibrateCameraFromSavedImages(Mat &cameraMatrix, Mat &distortionCoefficien
     cameraCalibration(saveImages, constants::chessboardDimensions, constants::calibrationSquareDimension, cameraMatrix,
                       distortionCoefficients);
     cout << "saving" << endl;
-    saveCameraCalibration("cameraCalibration", cameraMatrix, distortionCoefficients);
+    saveCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
     cout << "Done!" << endl;
 }
 
 void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoefficients, vector<Mat> &saveImages,
                        int &imagesCounter, bool isChessboardFound) {
 
-    switch (waitKey(0)) {
+    switch (waitKey(1)) {
         case ' ':
             if (isChessboardFound) {
                 saveFrame(frame, saveImages);

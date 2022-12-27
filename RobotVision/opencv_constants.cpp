@@ -11,5 +11,5 @@ namespace constants {
     extern const float arucoSquareDimension = 0.14f; // in meter
     extern const cv::Size chessboardDimensions = cv::Size(6, 9);
     extern const int dictionaryName = cv::aruco::DICT_4X4_1000;
-    extern const std::string cameraCalibrationPath = "C:\\Users\\Legend\\Desktop\\SDP\\SDP\\RobotVision\\CameraCalibration\\cameraCalibration";
+    extern const std::string cameraCalibrationPath = "../cameraCalibration";
 } // namespace constants

@@ -5,6 +5,7 @@ namespace constants {
     extern const float arucoSquareDimension; // in meter
     extern const cv::Size chessboardDimensions;
     extern const int dictionaryName;
+    extern const std::string cameraCalibrationPath;
 } // namespace constants
 
 #endif

@@ -156,8 +156,9 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
     // std::cout << "current : "<< &currentNode << " | parent : " << currentNode.parent << std::endl;
     for (Node neighbor : neighbors)
     {
-      // Update the neighbor's f value if the new path to it through the current node is shorter
       double g = currentNode.g + currentNode.position.length(neighbor.position);
+      double h = currentNode.h + currentNode.position.length(goal);
+      double f = h + g;
       bool isOpen = openListSearch.count(neighbor) > 0;
       bool isClose = closedList.count(neighbor) > 0;
 
@@ -165,9 +166,8 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
       std::tie(x, y) = neighbor.position.getCoordinate();
       // Check if the neighbor is on the closed list
       if (isClose) continue;
-
-      
-      if (isOpen && g < neighbor.g)
+      // Update the neighbor's f value if the new path to it through the current node is shorter
+      if (isOpen && f < neighbor.f)
       {
         neighbor.g = g;
         neighbor.f = g + neighbor.h;
@@ -186,10 +186,9 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
         markNodeOpen(neighbor, monitor);
       }
     }
-    // Scale the image by a factor of 4
-    // cv::Mat image_scaled;
-    // cv::resize(monitor, image_scaled, cv::Size(), 2, 2, cv::INTER_LINEAR);
-    // cv::imshow("Monitor", image_scaled);
-    // int key = cv::waitKey(1);
+      cv::Mat image_scaled;
+      cv::resize(monitor, image_scaled, cv::Size(), 2, 2, cv::INTER_LINEAR);
+      cv::imshow("Monitor", image_scaled);
+      int key = cv::waitKey(1);
   }
 }

@@ -45,6 +45,14 @@ void drawMarkersOnFrame(const cv::Mat &frame, const cv::Mat &distanceCoefficient
     }
 }
 
+
+void estimateMarkersPose(const cv::Mat frame, const cv::Mat distortionCoefficients, const cv::Mat cameraMatrix, std::vector<int>& markerIds, std::vector<cv::Vec3d> &rotationVectors, std::vector<cv::Vec3d> &translationVectors){
+    cv::Ptr<cv::aruco::Dictionary> markerDictionary = cv::aruco::getPredefinedDictionary(constants::dictionaryName);
+    std::vector<std::vector<cv::Point2f>> markerCorners;
+    cv::aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
+    cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix,
+                                             distortionCoefficients, rotationVectors, translationVectors);
+}
 void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, const cv::Mat &cameraMatrix) {
     int arucoXPos = 4;
     int arucoYPos = 6;
@@ -60,17 +68,16 @@ void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, c
 
     // map.drawMap();
     while (vid.read(frame)) {
-        cv::aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
-        cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix,
-                                             distortionCoefficients, rotationVectors, translationVectors);
+        estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
         drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
         // updatePositionOnMap(arucoXPos, arucoYPos, translationVectors, map);
         if(markerIds.size() != 0){
-            showTranslationInfo(frame, translationVectors, markerIds[0]);
-        }
+        std::cout << "Theta X:" << rotationVectors[0] << std::endl;
+        showTranslationInfo(frame, translationVectors, markerIds[0]);
+            
+        } 
         imshow("Cam", frame);
-        if (cv::waitKey(10) > 0)
-            break;
+        if (cv::waitKey(10) > 0) break;
     }
 }
 

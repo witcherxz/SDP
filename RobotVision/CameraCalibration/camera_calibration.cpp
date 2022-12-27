@@ -1,10 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include "vector"
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
+#include "../aruco_scanner.h"
 #include "../opencv_constants.h"
+#include "./camera_calibration.h"
 
 using namespace cv;
 using namespace std;
@@ -54,6 +57,35 @@ static void saveCameraCalibration(const string &filename, const Mat &cameraMatri
     fs << "distortion_coefficients" << distCoeffs;
 }
 
+void saveSystemCalibration(const string &filename, const vector<record_t> &real, const vector<record_t> &camera){
+    cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+    fs.startWriteStruct("real", cv::FileNode::SEQ);
+    for(record_t pos : real)
+    {
+        double x, y, thetaX, thetaY;
+        std::tie(x, y, thetaX, thetaY) = pos;
+        fs.startWriteStruct("", cv::FileNode::MAP);
+        fs << "x" << x;
+        fs << "y" << y;
+        fs << "thetaX" << thetaX;
+        fs << "thetaY" << thetaY;
+        fs.endWriteStruct();
+    }
+    fs.endWriteStruct();
+     fs.startWriteStruct("camera", cv::FileNode::SEQ);
+    for(record_t pos : camera)
+    {
+        double x, y, thetaX, thetaY;
+        std::tie(x, y, thetaX, thetaY) = pos;
+        fs.startWriteStruct("", cv::FileNode::MAP);
+        fs << "x" << x;
+        fs << "y" << y;
+        fs << "thetaX" << thetaX;
+        fs << "thetaY" << thetaY;
+        fs.endWriteStruct();
+    }
+    fs.endWriteStruct();
+}
 
 bool loadCameraCalibration(string path, Mat &camMatrix, Mat &distCoeffs) {
     FileStorage fs(path, FileStorage::READ);
@@ -104,7 +136,25 @@ void showNumberOfImagesTaken(const Mat frame, int imagesCounter) {
     counterLabel << "Number of images taken : " << imagesCounter;
     putText(frame, counterLabel.str(), Point2i(10, frame.cols - 200), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 255, 0));
 }
-
+void startPosCollection(){
+    Mat frame;
+    VideoCapture vid(0);
+    cv::Mat cameraMatrix, distortionCoefficients;
+    std::vector<int> markerIds;
+    std::vector<cv::Vec3d> rotationVectors, translationVectors;
+    loadCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
+    while (vid.read(frame)) {
+        estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
+        char c = cv::waitKey(0);
+        if(c == ' '){
+            int x;
+            std::cout << "Enter Real Coordinate (x, y, theta x, theta y) :" << std::endl;
+            std::cin >> x;
+            std::cout << "Test x :" << x << std::endl;
+        }
+        imshow("Cam", frame);
+    }
+}
 void startCameraCalibration() {
     Mat frame;
     Mat drawToFrame;

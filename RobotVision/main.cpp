@@ -8,7 +8,7 @@
 #include "Map/a_star.cpp"
 #include "iostream"
 #include "aruco_gnerator.h"
-
+#include "opencv_constants.h"
 
 #include <opencv2/aruco.hpp>
 #include <opencv2/core.hpp>
@@ -25,8 +25,8 @@ void displayMap(cv::Mat& mat){
 }
 int main(int argc, char **argv) {
     // startPosCollection();
-//    startCameraCalibration();
-     startCamMonitoring("C:\\Users\\Legend\\Desktop\\SDP\\SDP\\RobotVision\\CameraCalibration\\cameraCalibration");
+   startCameraCalibration();
+    //  startCamMonitoring(constants::cameraCalibrationPath);
 //     int scale = 10;
 //     GridMap map(10 * scale, 10 * scale, 1);
 //     std::cout << "Map created" << std::endl;

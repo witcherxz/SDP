@@ -51,14 +51,22 @@ void cameraCalibration(vector<Mat> images, Size boardSize, float squareEdgeLengt
 }
 
 static void saveCameraCalibration(const string &filename, const Mat &cameraMatrix, const Mat &distCoeffs) {
+    std::cout << filename << std::endl;
     FileStorage fs(filename, FileStorage::WRITE);
-
+    if(!fs.isOpened()){
+        std::cout << "Failed to open path : " << filename << std::endl;
+        exit(1);
+    }
     fs << "camera_matrix" << cameraMatrix;
     fs << "distortion_coefficients" << distCoeffs;
 }
 
 void saveSystemCalibration(const string &filename, const vector<record_t> &real, const vector<record_t> &camera){
     cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+    if(!fs.isOpened()){
+        std::cout << "Failed to open file : " << filename << std::endl;
+        exit(1);
+    }
     fs.startWriteStruct("real", cv::FileNode::SEQ);
     for(record_t pos : real)
     {
@@ -107,14 +115,15 @@ void calibrateCameraFromSavedImages(Mat &cameraMatrix, Mat &distortionCoefficien
     cameraCalibration(saveImages, constants::chessboardDimensions, constants::calibrationSquareDimension, cameraMatrix,
                       distortionCoefficients);
     cout << "saving" << endl;
-    saveCameraCalibration("cameraCalibration", cameraMatrix, distortionCoefficients);
+    std::cout << constants::cameraCalibrationPath << std::endl;
+    saveCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
     cout << "Done!" << endl;
 }
 
 void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoefficients, vector<Mat> &saveImages,
                        int &imagesCounter, bool isChessboardFound) {
 
-    switch (waitKey(0)) {
+    switch (waitKey(1)) {
         case ' ':
             if (isChessboardFound) {
                 saveFrame(frame, saveImages);
@@ -169,9 +178,10 @@ void startCameraCalibration() {
         vector<Vec2f> foundPoints;
         bool isFound = findChessboardCorners(frame, constants::chessboardDimensions, foundPoints,
                                              CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
-        showNumberOfImagesTaken(frame, imagesCounter);
-        drawChessboardCorners(frame, constants::chessboardDimensions, foundPoints, isFound);
-        imshow("Cam", frame);
+        frame.copyTo(drawToFrame);
+        showNumberOfImagesTaken(drawToFrame, imagesCounter);
+        drawChessboardCorners(drawToFrame, constants::chessboardDimensions, foundPoints, isFound);
+        imshow("Cam", drawToFrame);
         executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter, isFound);
     }
 }

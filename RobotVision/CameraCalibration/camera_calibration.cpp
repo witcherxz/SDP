@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include "vector"
+#include <vector>
+#include <map>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/aruco.hpp>
@@ -61,35 +62,42 @@ static void saveCameraCalibration(const string &filename, const Mat &cameraMatri
     fs << "distortion_coefficients" << distCoeffs;
 }
 
-void saveSystemCalibration(const string &filename, const vector<record_t> &real, const vector<record_t> &camera){
+void saveSystemCalibration(const string &filename, const vector<r_record_t> &real,const std::vector<std::vector<int>> listOfMarkerIds ,const std::map<int ,std::vector<c_record_t>> &camera){
     cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
     if(!fs.isOpened()){
-        std::cout << "Failed to open file : " << filename << std::endl;
         exit(1);
     }
     fs.startWriteStruct("real", cv::FileNode::SEQ);
-    for(record_t pos : real)
+    for(int i = 0; i < real.size(); i++)
     {
-        double x, y, thetaX, thetaY;
-        std::tie(x, y, thetaX, thetaY) = pos;
+        double x, y, theta;
+        std::tie(x, y, theta) = real[i];
         fs.startWriteStruct("", cv::FileNode::MAP);
+        fs << "ids" << listOfMarkerIds[i];
         fs << "x" << x;
         fs << "y" << y;
-        fs << "thetaX" << thetaX;
-        fs << "thetaY" << thetaY;
+        fs << "theta" << theta;
         fs.endWriteStruct();
     }
     fs.endWriteStruct();
-     fs.startWriteStruct("camera", cv::FileNode::SEQ);
-    for(record_t pos : camera)
+    fs.startWriteStruct("camera", cv::FileNode::MAP);
+    for(auto pair : camera)
     {
-        double x, y, thetaX, thetaY;
-        std::tie(x, y, thetaX, thetaY) = pos;
-        fs.startWriteStruct("", cv::FileNode::MAP);
-        fs << "x" << x;
-        fs << "y" << y;
-        fs << "thetaX" << thetaX;
-        fs << "thetaY" << thetaY;
+        int id = pair.first;
+        fs.startWriteStruct("_"+std::to_string(id), cv::FileNode::SEQ);
+        for(auto pos : pair.second)
+        {
+            double x, y, z, thetaX, thetaY, thetaZ;
+            std::tie(x, y, z, thetaX, thetaY, thetaZ) = pos;
+            fs.startWriteStruct("", cv::FileNode::MAP);
+            fs << "x" << x;
+            fs << "y" << y;
+            fs << "z" << z;
+            fs << "thetaX" << thetaX;
+            fs << "thetaY" << thetaY;
+            fs << "thetaZ" << thetaZ;
+            fs.endWriteStruct();
+        }
         fs.endWriteStruct();
     }
     fs.endWriteStruct();
@@ -145,21 +153,54 @@ void showNumberOfImagesTaken(const Mat frame, int imagesCounter) {
     counterLabel << "Number of images taken : " << imagesCounter;
     putText(frame, counterLabel.str(), Point2i(10, frame.cols - 200), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 255, 0));
 }
+void pushCameraRecords(std::map<int ,std::vector<c_record_t>> &cameraRecords,std::vector<int> ids,std::vector<cv::Vec3d> rVecs, std::vector<cv::Vec3d> tVecs){
+    for (int i = 0; i < tVecs.size(); i++)
+    {
+        c_record_t record = std::make_tuple(tVecs[i][0], tVecs[i][1], tVecs[i][2], rVecs[i][0], rVecs[i][1], rVecs[i][2]);
+        cameraRecords[ids[i]].push_back(record);
+    }
+}
+void pushRealRecord(std::vector<r_record_t>& real){
+    // std::vector<std::string> names{"x", "y" ,"theta"};
+    std::string buff;
+    double x, y, theta;
+    std::cout << "Enter x :" << std::endl;
+    std::cin >> buff;
+    x = std::stod(buff);
+    std::cout << "Enter y :" << std::endl;
+    std::cin >> buff;
+    y = std::stod(buff);
+    std::cout << "Enter theta:" << std::endl;
+    std::cin >> buff;
+    theta = std::stod(buff);
+    r_record_t realRecord = std::make_tuple(x, y, theta);
+    real.push_back(realRecord);
+}
 void startPosCollection(){
     Mat frame;
     VideoCapture vid(0);
     cv::Mat cameraMatrix, distortionCoefficients;
     std::vector<int> markerIds;
+    std::vector<std::vector<int>> capturedMarkers;
     std::vector<cv::Vec3d> rotationVectors, translationVectors;
+    std::vector<r_record_t> real;
+    std::map<int, std::vector<c_record_t>> camera;
+    
     loadCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
     while (vid.read(frame)) {
         estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
-        char c = cv::waitKey(0);
+        drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
+        char c = cv::waitKey(1);
         if(c == ' '){
-            int x;
-            std::cout << "Enter Real Coordinate (x, y, theta x, theta y) :" << std::endl;
-            std::cin >> x;
-            std::cout << "Test x :" << x << std::endl;
+            pushRealRecord(real);
+            pushCameraRecords(camera, markerIds, rotationVectors, translationVectors);
+            capturedMarkers.push_back(markerIds);
+
+        }
+        if(c == 's'){
+            saveSystemCalibration(constants::systemCalibrationPath, real, capturedMarkers ,camera);
+            std::cout << "File Saved in : " << constants::systemCalibrationPath << std::endl;
+            exit(0);
         }
         imshow("Cam", frame);
     }

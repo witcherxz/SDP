@@ -6,6 +6,7 @@ namespace constants {
     extern const cv::Size chessboardDimensions;
     extern const int dictionaryName;
     extern const std::string cameraCalibrationPath;
+    extern const std::string systemCalibrationPath;
 } // namespace constants
 
 #endif

@@ -25,8 +25,8 @@ void displayMap(cv::Mat& mat){
 }
 int main(int argc, char **argv) {
     // startPosCollection();
-   startCameraCalibration();
-    //  startCamMonitoring(constants::cameraCalibrationPath);
+  //  startCameraCalibration();
+     startCamMonitoring(constants::cameraCalibrationPath);
 //     int scale = 10;
 //     GridMap map(10 * scale, 10 * scale, 1);
 //     std::cout << "Map created" << std::endl;

@@ -45,7 +45,6 @@ void drawMarkersOnFrame(const cv::Mat &frame, const cv::Mat &distanceCoefficient
     }
 }
 
-
 void estimateMarkersPose(const cv::Mat frame, const cv::Mat distortionCoefficients, const cv::Mat cameraMatrix, std::vector<int>& markerIds, std::vector<cv::Vec3d> &rotationVectors, std::vector<cv::Vec3d> &translationVectors){
     cv::Ptr<cv::aruco::Dictionary> markerDictionary = cv::aruco::getPredefinedDictionary(constants::dictionaryName);
     std::vector<std::vector<cv::Point2f>> markerCorners;
@@ -53,6 +52,7 @@ void estimateMarkersPose(const cv::Mat frame, const cv::Mat distortionCoefficien
     cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix,
                                              distortionCoefficients, rotationVectors, translationVectors);
 }
+
 void monitorArucoMarkers(cv::Mat frame, const cv::Mat &distortionCoefficients, const cv::Mat &cameraMatrix) {
     int arucoXPos = 4;
     int arucoYPos = 6;

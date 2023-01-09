@@ -7,6 +7,7 @@ namespace constants {
     extern const int dictionaryName;
     extern const std::string cameraCalibrationPath;
     extern const std::string systemCalibrationPath;
+    extern const std::string calibrationImagesFolder;
 } // namespace constants
 
 #endif

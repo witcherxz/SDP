@@ -62,12 +62,18 @@ static void saveCameraCalibration(const string &filename, const Mat &cameraMatri
     fs << "distortion_coefficients" << distCoeffs;
 }
 
+void testReadFile(const string filename){
+    cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+    std::cout << fs.getFirstTopLevelNode().name() << std::endl;
+}
 void saveSystemCalibration(const string &filename, const vector<r_record_t> &real,const std::vector<std::vector<int>> listOfMarkerIds ,const std::map<int ,std::vector<c_record_t>> &camera){
     cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
     if(!fs.isOpened()){
+        std::cout << "Could not open file :" << fs.NAME_EXPECTED << std::endl;
         exit(1);
     }
     fs.startWriteStruct("real", cv::FileNode::SEQ);
+    // fs << real;
     for(int i = 0; i < real.size(); i++)
     {
         double x, y, theta;
@@ -81,6 +87,7 @@ void saveSystemCalibration(const string &filename, const vector<r_record_t> &rea
     }
     fs.endWriteStruct();
     fs.startWriteStruct("camera", cv::FileNode::MAP);
+    // fs << camera;
     for(auto pair : camera)
     {
         int id = pair.first;
@@ -128,6 +135,12 @@ void calibrateCameraFromSavedImages(Mat &cameraMatrix, Mat &distortionCoefficien
     cout << "Done!" << endl;
 }
 
+void saveImagesInLocalStorage(std::vector<cv::Mat> images){
+    for(int i = 0; i < images.size(); i++)
+    {   std::string path = constants::calibrationImagesFolder + "\\" + std::to_string(i) + ".jpeg";
+        cv::imwrite(path, images[i]);
+    }
+}
 void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoefficients, vector<Mat> &saveImages,
                        int &imagesCounter, bool isChessboardFound) {
 
@@ -140,6 +153,7 @@ void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoeff
             break;
         case 13:
             if (saveImages.size() > 15) {
+                saveImagesInLocalStorage(saveImages);
                 calibrateCameraFromSavedImages(cameraMatrix, distortionCoefficients, saveImages);
             }
             break;
@@ -187,9 +201,10 @@ void startPosCollection(){
     std::map<int, std::vector<c_record_t>> camera;
     
     loadCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
+    // testReadFile(constants::systemCalibrationPath);
     while (vid.read(frame)) {
-        estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
-        drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
+        // estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
+        // drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
         char c = cv::waitKey(1);
         if(c == ' '){
             pushRealRecord(real);
@@ -207,12 +222,15 @@ void startPosCollection(){
 }
 void startCameraCalibration() {
     Mat frame;
+    Mat resized;
     Mat drawToFrame;
     Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
     Mat distortionCoefficients;
     vector<Mat> saveImages;
     vector<vector<Point2f>> markerCorners, rejectedCandidates;
     VideoCapture vid(0);
+    vid.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+    vid.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
     int imagesCounter = 0;
     namedWindow("Cam", WINDOW_AUTOSIZE);
     while (vid.read(frame)) {
@@ -222,7 +240,8 @@ void startCameraCalibration() {
         frame.copyTo(drawToFrame);
         showNumberOfImagesTaken(drawToFrame, imagesCounter);
         drawChessboardCorners(drawToFrame, constants::chessboardDimensions, foundPoints, isFound);
-        imshow("Cam", drawToFrame);
+        cv::resize(drawToFrame, resized, cv::Size(), 0.5, 0.5);
+        imshow("Cam", resized);
         executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter, isFound);
     }
 }

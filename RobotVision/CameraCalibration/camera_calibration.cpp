@@ -191,19 +191,55 @@ void pushRealRecord(std::vector<r_record_t>& real){
     real.push_back(realRecord);
 }
 
+
+
+void startCameraCalibration() {
+    Mat frame;
+    Mat resized;
+    Mat drawToFrame;
+    Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
+    Mat distortionCoefficients;
+    vector<Mat> saveImages;
+    vector<vector<Point2f>> markerCorners, rejectedCandidates;
+    VideoCapture vid(1);
+    vid.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+    vid.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+    int imagesCounter = 0;
+    namedWindow("Cam", WINDOW_AUTOSIZE);
+    while (vid.read(frame)) {
+        vector<Vec2f> foundPoints;
+        bool isFound = findChessboardCorners(frame, constants::chessboardDimensions, foundPoints,
+                                             CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+        frame.copyTo(drawToFrame);
+        showNumberOfImagesTaken(drawToFrame, imagesCounter);
+        drawChessboardCorners(drawToFrame, constants::chessboardDimensions, foundPoints, isFound);
+        cv::resize(drawToFrame, resized, cv::Size(), 0.5, 0.5);
+        imshow("Cam", resized);
+        executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter, isFound);
+    }
+}
+
 void CameraCenterCalibration::showAngleInfo(cv::Mat frame){
     std::string info = "Angle : " + std::to_string(angle);
     cv::putText(frame, info, cv::Point(100, 150), cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0));
+    
 }
-void test(cv::Mat& s){
+void CameraCenterCalibration::saveCalibration(){
+    std::string filePath = constants::cameraCenterCalibrationPath;
+    FileStorage fs(filePath, FileStorage::WRITE);
+    if(!fs.isOpened()){
+        std::cout << "Failed to open path : " << filePath << std::endl;
+        exit(1);
+    }
+    fs << "cx" << cx;
+    fs << "cy" << cy;
+}
 
-}
 void CameraCenterCalibration::calculateCenter(){
     if(points.size() != oppositePoints.size()){
         std::cout << "The number of taken points does not equal the number of opposite points" << std::endl;
         return;
     }
-    double cx, cy;
     double avgpx = 0;
     double avgpy = 0;
     double avgopx = 0;
@@ -252,6 +288,7 @@ void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
             addPoint();
         }else if(input == 's'){
             calculateCenter();
+            saveCalibration();
         }
     }
 }
@@ -266,30 +303,11 @@ void CameraCenterCalibration::centerCalibration(){
     arucoScanner.openCamera(Process);
 }
 
-
-void startCameraCalibration() {
-    Mat frame;
-    Mat resized;
-    Mat drawToFrame;
-    Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
-    Mat distortionCoefficients;
-    vector<Mat> saveImages;
-    vector<vector<Point2f>> markerCorners, rejectedCandidates;
-    VideoCapture vid(1);
-    vid.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-    vid.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
-    int imagesCounter = 0;
-    namedWindow("Cam", WINDOW_AUTOSIZE);
-    while (vid.read(frame)) {
-        vector<Vec2f> foundPoints;
-        bool isFound = findChessboardCorners(frame, constants::chessboardDimensions, foundPoints,
-                                             CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
-        frame.copyTo(drawToFrame);
-        showNumberOfImagesTaken(drawToFrame, imagesCounter);
-        drawChessboardCorners(drawToFrame, constants::chessboardDimensions, foundPoints, isFound);
-        cv::resize(drawToFrame, resized, cv::Size(), 0.5, 0.5);
-        imshow("Cam", resized);
-        executeKeyCommand(frame, cameraMatrix, distortionCoefficients, saveImages, imagesCounter, isFound);
-    }
+std::tuple<double, double> CameraCenterCalibration::loadCameraCenter(){
+    FileStorage fs(constants::cameraCenterCalibrationPath, FileStorage::READ);
+    if (!fs.isOpened()) std::cout << "Error while opening file" << std::endl;
+    double cx, cy;
+    fs["cx"] >> cx;
+    fs["cy"] >> cy;
+    return std::make_tuple(cx, cy);
 }
-

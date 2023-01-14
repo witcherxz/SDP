@@ -19,6 +19,8 @@ class CameraCenterCalibration {
     double storedAngle;
     double angle;
     bool isOpposite = false;
+    double cx;
+    double cy;
     std::vector<std::tuple<double, double>> points;
     std::vector<std::tuple<double, double>> oppositePoints;
     ArucoScanner arucoScanner = ArucoScanner();
@@ -26,8 +28,10 @@ class CameraCenterCalibration {
     void intrinsicCalibration();
     void centerCalibrationProccess(cv::Mat& frame);
     void calculateCenter();
+    void saveCalibration();
     void addPoint();
     public:
         void centerCalibration();
+        static std::tuple<double, double> loadCameraCenter();
 };
 #endif // ROBOTVISION_CAMERACALIBRATION_H

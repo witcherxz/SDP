@@ -18,6 +18,7 @@ namespace constants {
     extern const int dictionaryName = cv::aruco::DICT_4X4_50;
     extern const std::string cameraCalibrationPath = homedir + "\\Documents\\cameraCalibration";
     extern const std::string systemCalibrationPath = homedir + "\\Documents\\systemCalibration.json";
+    extern const std::string cameraCenterCalibrationPath = homedir + "\\Documents\\cameraCenterCalibration";
     extern const std::string calibrationImagesFolder = homedir + "\\Documents\\calibrationImagesFolder";
     
 } // namespace constants

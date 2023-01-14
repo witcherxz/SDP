@@ -41,7 +41,7 @@ void ArucoScanner::showTransformationInfo(const cv::Mat &frame) {
     }
 }
 
-void ArucoScanner::openCamera(std::function<void(cv::Mat&)> func){
+void ArucoScanner::openCamera(std::function<void(cv::Mat&)> func, bool showCamera=true){
     cv::VideoCapture vid(1);
     cv::namedWindow("Cam");
     cv::Mat frame;
@@ -52,7 +52,7 @@ void ArucoScanner::openCamera(std::function<void(cv::Mat&)> func){
     while (vid.read(frame)) {
         func(frame);
         cv::resize(frame, resized, cv::Size(), 0.5, 0.5);
-        imshow("Cam", resized);
+        if(showCamera) imshow("Cam", resized);
         cv::waitKey(1);
         // if (cv::waitKey(1) > 0) break;
     } 
@@ -97,29 +97,6 @@ cv::Mat rotationMatrixToEulerAngles(cv::Mat R){
 
 }
 
-cv::Mat rotationMatrixToEulerAnglesV2(cv::Mat R){
-    double x, y ,z;
-    if(abs(R.at<double>(3, 1)) != 1){
-        y = -asin(R.at<double>(3, 1));
-        x = atan2(R.at<double>(3, 2) / cos(y), R.at<double>(3, 3) / cos(y));
-        z = atan2(R.at<double>(2, 1) / cos(y), R.at<double>(1, 1) / cos(y));
-    }else{
-        z = 0;
-        if(R.at<double>(3, 1) == -1){
-            y = PI / 2;
-            x = z + atan2(R.at<double>(1, 2), R.at<double>(1, 3));
-        }else{
-            y = - PI / 2;
-            x = z + atan2(-R.at<double>(1, 2), -R.at<double>(1, 3));
-        }
-    }
-
-    cv::Mat eulerVec = cv::Mat(3, 1, CV_64F);
-    eulerVec.at<double>(0,0) = x;
-    eulerVec.at<double>(1,0) = y;
-    eulerVec.at<double>(2,0) = z;
-    return  eulerVec;
-}
 
 void ArucoScanner::addPose(double x, double y, double angle){
     double alpha = 0.80;

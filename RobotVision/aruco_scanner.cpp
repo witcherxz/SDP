@@ -98,7 +98,7 @@ cv::Mat rotationMatrixToEulerAngles(cv::Mat R){
 }
 
 void ArucoScanner::addPose(double x, double y, double angle, int markerId){
-    double alpha = 0.80;
+    double alpha = 0.95;
     double threshold = 5;
     if(angle < threshold || (angle + threshold) > 360) alpha = 0; // To fix average of 360-0 wrap around angle
     if(xytheta.count(markerId) > 0){
@@ -109,7 +109,7 @@ void ArucoScanner::addPose(double x, double y, double angle, int markerId){
         std::vector<double> pose = {x, y, angle};
         xytheta[markerId] = pose;
     }
-    printf("id: %d, x : %.2f, y : %.2f, theta : %.2f\n",markerId,xytheta[markerId][0],xytheta[markerId][1],xytheta[markerId][2]);
+    // printf("id: %d, x : %.2f, y : %.2f, theta : %.2f\n",markerId,xytheta[markerId][0],xytheta[markerId][1],xytheta[markerId][2]);
 }
 
 void ArucoScanner::poseCorrection(){
@@ -170,7 +170,7 @@ double ArucoScanner::getOrientation(int markerId){
 }
 
 bool ArucoScanner::isArucoFound(){
-    return xytheta.size() > 0;
+    return markerIds.size() > 0;
 }
 
 ArucoScanner::ArucoScanner(){

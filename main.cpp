@@ -18,9 +18,9 @@
 int main(int argc, char **argv) {
   // startPosCollection();
   //  startCameraCalibration();
-  ArucoScanner as = ArucoScanner();
-  as.monitorArucoMarkers();
-  // CameraCenterCalibration cc = CameraCenterCalibration();
-  // cc.centerCalibration();
+  // ArucoScanner as = ArucoScanner();
+  // as.monitorArucoMarkers();
+  CameraCenterCalibration cc = CameraCenterCalibration();
+  cc.centerCalibration();
   return 0;
 }

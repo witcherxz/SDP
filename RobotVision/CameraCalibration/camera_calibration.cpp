@@ -220,9 +220,8 @@ void startCameraCalibration() {
 }
 
 void CameraCenterCalibration::showAngleInfo(cv::Mat frame){
-    std::string info = "Angle : " + std::to_string(angle);
-    cv::putText(frame, info, cv::Point(100, 150), cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0));
-    
+    std::string info = "ID :" + std::to_string(arucoScanner.getIdOfClosestMarker()) +", Angle : " + std::to_string(angle);
+    cv::putText(frame, info, cv::Point(100, 150), cv::FONT_HERSHEY_SIMPLEX, 2,cv::Scalar(0, 255, 0), 3);
 }
 void CameraCenterCalibration::saveCalibration(){
     std::string filePath = constants::cameraCenterCalibrationPath;
@@ -265,7 +264,7 @@ void CameraCenterCalibration::calculateCenter(){
 }
 void CameraCenterCalibration::addPoint(){
     double x, y;
-    std::tie(x, y) = arucoScanner.getOriginalPosition();
+    std::tie(x, y) = arucoScanner.getOriginalPosition(arucoScanner.getIdOfClosestMarker());
     if(!isOpposite){
         std::cout << "point is taken " << std::endl;
         points.push_back(std::make_tuple(abs(x), abs(y)));
@@ -280,7 +279,7 @@ void CameraCenterCalibration::addPoint(){
 void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
     arucoScanner.estimateMarkersPose(frame);
     if(arucoScanner.isArucoFound()){
-        angle = arucoScanner.getOrientation();
+        angle = arucoScanner.getOrientation(arucoScanner.getIdOfClosestMarker());
         showAngleInfo(frame);
         char input;
         input = cv::waitKey(1);
@@ -305,7 +304,7 @@ void CameraCenterCalibration::centerCalibration(){
 
 std::tuple<double, double> CameraCenterCalibration::loadCameraCenter(){
     FileStorage fs(constants::cameraCenterCalibrationPath, FileStorage::READ);
-    if (!fs.isOpened()) std::cout << "Error while opening file" << std::endl;
+    if (!fs.isOpened()) return std::make_tuple(0, 0);
     double cx, cy;
     fs["cx"] >> cx;
     fs["cy"] >> cy;

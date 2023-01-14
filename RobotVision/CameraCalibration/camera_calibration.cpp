@@ -120,7 +120,7 @@ bool loadCameraCalibration(string path, Mat &camMatrix, Mat &distCoeffs) {
 }
 
 void saveFrame(const Mat &frame, vector<Mat> &saveImages) {
-    Mat temp;
+Mat temp;
     frame.copyTo(temp);
     saveImages.push_back(temp);
 }
@@ -165,7 +165,7 @@ void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoeff
 void showNumberOfImagesTaken(const Mat frame, int imagesCounter) {
     ostringstream counterLabel;
     counterLabel << "Number of images taken : " << imagesCounter;
-    putText(frame, counterLabel.str(), Point2i(10, frame.cols - 200), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 255, 0));
+    putText(frame, counterLabel.str(), Point2i(100, frame.cols - 900), FONT_HERSHEY_PLAIN, 5, Scalar(0, 255, 0));
 }
 void pushCameraRecords(std::map<int ,std::vector<c_record_t>> &cameraRecords,std::vector<int> ids,std::vector<cv::Vec3d> rVecs, std::vector<cv::Vec3d> tVecs){
     for (int i = 0; i < tVecs.size(); i++)
@@ -190,36 +190,83 @@ void pushRealRecord(std::vector<r_record_t>& real){
     r_record_t realRecord = std::make_tuple(x, y, theta);
     real.push_back(realRecord);
 }
-void startPosCollection(){
-    Mat frame;
-    VideoCapture vid(0);
-    cv::Mat cameraMatrix, distortionCoefficients;
-    std::vector<int> markerIds;
-    std::vector<std::vector<int>> capturedMarkers;
-    std::vector<cv::Vec3d> rotationVectors, translationVectors;
-    std::vector<r_record_t> real;
-    std::map<int, std::vector<c_record_t>> camera;
-    
-    loadCameraCalibration(constants::cameraCalibrationPath, cameraMatrix, distortionCoefficients);
-    // testReadFile(constants::systemCalibrationPath);
-    while (vid.read(frame)) {
-        // estimateMarkersPose(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
-        // drawMarkersOnFrame(frame, distortionCoefficients, cameraMatrix, markerIds, rotationVectors, translationVectors);
-        char c = cv::waitKey(1);
-        if(c == ' '){
-            pushRealRecord(real);
-            pushCameraRecords(camera, markerIds, rotationVectors, translationVectors);
-            capturedMarkers.push_back(markerIds);
 
+void CameraCenterCalibration::showAngleInfo(cv::Mat frame){
+    std::string info = "Angle : " + std::to_string(angle);
+    cv::putText(frame, info, cv::Point(100, 150), cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0));
+}
+void test(cv::Mat& s){
+
+}
+void CameraCenterCalibration::calculateCenter(){
+    if(points.size() != oppositePoints.size()){
+        std::cout << "The number of taken points does not equal the number of opposite points" << std::endl;
+        return;
+    }
+    double cx, cy;
+    double avgpx = 0;
+    double avgpy = 0;
+    double avgopx = 0;
+    double avgopy = 0;
+    for (int i = 0; i < points.size(); i++){   
+        double px, py;
+        double opx, opy;
+        std::tie(px, py) = points[i];
+        std::tie(opx, opy) = oppositePoints[i];
+        avgpx += px;
+        avgpy += py;
+        avgopx += opx;
+        avgopy += opy;
+    }
+    int num = points.size();
+    avgpx /= num;
+    avgpy /= num;
+    avgopx /= num;
+    avgopy /= num;
+    cx = (avgopx + avgpx) / 2;
+    cy = (avgopy + avgpy) / 2;
+    std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
+}
+void CameraCenterCalibration::addPoint(){
+    double x, y;
+    std::tie(x, y) = arucoScanner.getOriginalPosition();
+    if(!isOpposite){
+        std::cout << "point is taken " << std::endl;
+        points.push_back(std::make_tuple(abs(x), abs(y)));
+    }else{
+        std::cout << "opposite point is taken " << std::endl;
+        oppositePoints.push_back(std::make_tuple(abs(x), abs(y)));
+    }
+    std::cout << "x : " << x << ", y : " << y << std::endl;
+    isOpposite = !isOpposite;
+}
+
+void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
+    arucoScanner.estimateMarkersPose(frame);
+    if(arucoScanner.isArucoFound()){
+        angle = arucoScanner.getOrientation();
+        showAngleInfo(frame);
+        char input;
+        input = cv::waitKey(1);
+        if(input == 'c'){
+            addPoint();
+        }else if(input == 's'){
+            calculateCenter();
         }
-        if(c == 's'){
-            saveSystemCalibration(constants::systemCalibrationPath, real, capturedMarkers ,camera);
-            std::cout << "File Saved in : " << constants::systemCalibrationPath << std::endl;
-            exit(0);
-        }
-        imshow("Cam", frame);
     }
 }
+
+void CameraCenterCalibration::centerCalibration(){
+    std::cout << "Take multiple pair data points that have the same postion but opposite angles" << std::endl;
+    std::cout << "Press c to take a point" << std::endl;
+    std::cout << "Press s to calculate average center and save it" << std::endl;
+    std::function<void(cv::Mat&)> Process = [=](cv::Mat& frame) {
+            centerCalibrationProccess(frame);
+    };
+    arucoScanner.openCamera(Process);
+}
+
+
 void startCameraCalibration() {
     Mat frame;
     Mat resized;
@@ -228,7 +275,7 @@ void startCameraCalibration() {
     Mat distortionCoefficients;
     vector<Mat> saveImages;
     vector<vector<Point2f>> markerCorners, rejectedCandidates;
-    VideoCapture vid(0);
+    VideoCapture vid(1);
     vid.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
     vid.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
     int imagesCounter = 0;

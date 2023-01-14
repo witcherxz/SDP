@@ -1,5 +1,7 @@
 #include <opencv2/core/mat.hpp>
 #include <iostream>
+#include "../aruco_scanner.h"
+#include <opencv2/highgui.hpp>
 
 #ifndef ROBOTVISION_CAMERACALIBRATION_H
 #define ROBOTVISION_CAMERACALIBRATION_H
@@ -13,4 +15,19 @@ void saveSystemCalibration(const std::string &filename, const std::vector<r_reco
 
 void startCameraCalibration();
 
+class CameraCenterCalibration {
+    double storedAngle;
+    double angle;
+    bool isOpposite = false;
+    std::vector<std::tuple<double, double>> points;
+    std::vector<std::tuple<double, double>> oppositePoints;
+    ArucoScanner arucoScanner = ArucoScanner();
+    void showAngleInfo(cv::Mat frame);
+    void intrinsicCalibration();
+    void centerCalibrationProccess(cv::Mat& frame);
+    void calculateCenter();
+    void addPoint();
+    public:
+        void centerCalibration();
+};
 #endif // ROBOTVISION_CAMERACALIBRATION_H

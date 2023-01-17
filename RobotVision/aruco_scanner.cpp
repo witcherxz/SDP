@@ -33,6 +33,9 @@ void ArucoScanner::showTransformationInfo(const cv::Mat &frame) {
     if (translationVectors.size().width > 0) {
         std::ostringstream distance;
         std::ostringstream rotation;
+        cv::Point2d pp(cameraMatrix.at<double>(0, 2), cameraMatrix.at<double>(1, 2));
+        cv::Scalar color(0, 0, 255); // red color
+        cv::circle(frame, pp, 5, color, 3);
         int id = getIdOfClosestMarker();
         distance << "ID: " << id << ", pose : " << "{ x : "<< xytheta[id][0] << ", y : " << xytheta[id][1] << ", theta : " << xytheta[id][2] << "}";
         putText(frame, distance.str(), cv::Point2i(20, frame.size().height - 20), cv::FONT_HERSHEY_SIMPLEX, 1,cv::Scalar(0, 255, 0), 3);
@@ -60,8 +63,8 @@ void ArucoScanner::openCamera(std::function<void(cv::Mat&)> func, bool showCamer
 void ArucoScanner::drawArucoMarker(cv::Mat& frame){
     for (int i = 0; i < markerIds.size(); i++) {
 
-        cv::Vec3d test({rotationVectors(i)[0], rotationVectors(i)[1], rotationVectors(i)[2]});
-        drawFrameAxes(frame, cameraMatrix, distortionCoefficients, test, translationVectors(i),
+        cv::Vec3d vec({rotationVectors(i)[0], rotationVectors(i)[1], rotationVectors(i)[2]});
+        drawFrameAxes(frame, cameraMatrix, distortionCoefficients, vec, translationVectors(i),
         constants::arucoSquareDimension);
         showTransformationInfo(frame);
     }
@@ -117,14 +120,14 @@ void ArucoScanner::poseCorrection(){
     cv::Mat R_ct;
     for (int i = 0; i < markerIds.size(); i++){
         cv::Rodrigues(rotationVectors(i), R_ct);
-        orientation = rotationMatrixToEulerAngles(flipPitch * R_ct.t());
+        cv::Mat R = flipPitch * R_ct.t();
+        orientation = rotationMatrixToEulerAngles(R);
         if(orientation(2, 0) < 0) {
             orientation(2, 0) = orientation(2, 0) + 360;
         }
         double theta = -orientation(2, 0) * (PI / 180);
-        std::cout << theta << std::endl;
         cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(theta), -sin(theta), 0, sin(theta), cos(theta), 0, 0,0,1);
-        cv::Mat_<double> fixedPose =  zRotation.t() * (translationVectors(i) - center);
+        cv::Mat_<double> fixedPose = zRotation.t() * (translationVectors(i) - center);
         fixedPose = fixedPose + center;
         if(orientation(2, 0) < 0) {
             orientation(2, 0) = orientation(2, 0) + 360;
@@ -145,18 +148,18 @@ void ArucoScanner::estimateMarkersPose(const cv::Mat frame){
     }
 }
 
-void ArucoScanner::monitorArucoMarkers(){
+void ArucoScanner::monitorArucoMarkers(bool showCamera){
     std::function<void(cv::Mat &)> arucoMarkerDrawProccess = [=](cv::Mat& frame) {
         estimateMarkersPose(frame);
         drawArucoMarker(frame);
     };
-    openCamera(arucoMarkerDrawProccess);
+    openCamera(arucoMarkerDrawProccess, showCamera);
 }
 
 
-std::tuple<double, double> ArucoScanner::getPostion(int markerId){
+cv::Point_<double> ArucoScanner::getPostion(int markerId){
     assert(xytheta.count(markerId) > 0);
-    return std::make_tuple(xytheta[markerId][0], xytheta[markerId][1]);
+    return cv::Point_<double>(xytheta[markerId][0], xytheta[markerId][1]);
 }
 
 std::tuple<double, double> ArucoScanner::getOriginalPosition(int markerId){
@@ -203,4 +206,8 @@ int ArucoScanner::getIdOfClosestMarker(){
         }
     }
     return markerIds[idIndex];
+}
+
+int ArucoScanner::getNumberOfAruco(){
+    return markerIds.size();
 }

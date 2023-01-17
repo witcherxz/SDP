@@ -98,7 +98,7 @@ cv::Mat rotationMatrixToEulerAngles(cv::Mat R){
 }
 
 void ArucoScanner::addPose(double x, double y, double angle, int markerId){
-    double alpha = 0.95;
+    double alpha = 0.8;
     double threshold = 5;
     if(angle < threshold || (angle + threshold) > 360) alpha = 0; // To fix average of 360-0 wrap around angle
     if(xytheta.count(markerId) > 0){
@@ -118,9 +118,13 @@ void ArucoScanner::poseCorrection(){
     for (int i = 0; i < markerIds.size(); i++){
         cv::Rodrigues(rotationVectors(i), R_ct);
         orientation = rotationMatrixToEulerAngles(flipPitch * R_ct.t());
-        double theta = orientation(2, 0) * (PI / 180);
+        if(orientation(2, 0) < 0) {
+            orientation(2, 0) = orientation(2, 0) + 360;
+        }
+        double theta = -orientation(2, 0) * (PI / 180);
+        std::cout << theta << std::endl;
         cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(theta), -sin(theta), 0, sin(theta), cos(theta), 0, 0,0,1);
-        cv::Mat_<double> fixedPose = zRotation * (translationVectors(i) - center);
+        cv::Mat_<double> fixedPose =  zRotation.t() * (translationVectors(i) - center);
         fixedPose = fixedPose + center;
         if(orientation(2, 0) < 0) {
             orientation(2, 0) = orientation(2, 0) + 360;
@@ -159,7 +163,7 @@ std::tuple<double, double> ArucoScanner::getOriginalPosition(int markerId){
     assert(translationVectors.size().width > 0);
     for (int i = 0; i < markerIds.size(); i++){
         if(markerIds[i] == markerId){
-            return std::make_tuple(translationVectors(0)[0], translationVectors(0)[1]);
+            return std::make_tuple(translationVectors(i)[0], translationVectors(i)[1]);
         }
     }
 }

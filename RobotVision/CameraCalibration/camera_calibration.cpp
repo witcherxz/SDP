@@ -239,38 +239,29 @@ void CameraCenterCalibration::calculateCenter(){
         std::cout << "The number of taken points does not equal the number of opposite points" << std::endl;
         return;
     }
-    double avgpx = 0;
-    double avgpy = 0;
-    double avgopx = 0;
-    double avgopy = 0;
+    double avgcx = 0;
+    double avgcy = 0;
     for (int i = 0; i < points.size(); i++){   
         double px, py;
         double opx, opy;
         std::tie(px, py) = points[i];
         std::tie(opx, opy) = oppositePoints[i];
-        avgpx += px;
-        avgpy += py;
-        avgopx += opx;
-        avgopy += opy;
+        avgcx += (px + opx) / 2;
+        avgcy += (py + opy) / 2;
     }
-    int num = points.size();
-    avgpx /= num;
-    avgpy /= num;
-    avgopx /= num;
-    avgopy /= num;
-    cx = (avgopx + avgpx) / 2;
-    cy = (avgopy + avgpy) / 2;
-    std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
+    int n = points.size();
+    cx = avgcx / n;
+    cy = avgcy / n;
 }
 void CameraCenterCalibration::addPoint(){
     double x, y;
     std::tie(x, y) = arucoScanner.getOriginalPosition(arucoScanner.getIdOfClosestMarker());
     if(!isOpposite){
         std::cout << "point is taken " << std::endl;
-        points.push_back(std::make_tuple(abs(x), abs(y)));
+        points.push_back(std::make_tuple(x, y));
     }else{
         std::cout << "opposite point is taken " << std::endl;
-        oppositePoints.push_back(std::make_tuple(abs(x), abs(y)));
+        oppositePoints.push_back(std::make_tuple(x, y));
     }
     std::cout << "x : " << x << ", y : " << y << std::endl;
     isOpposite = !isOpposite;
@@ -288,6 +279,9 @@ void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
         }else if(input == 's'){
             calculateCenter();
             saveCalibration();
+        }else if (input == 'p'){
+            calculateCenter();
+            std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
         }
     }
 }
@@ -296,6 +290,7 @@ void CameraCenterCalibration::centerCalibration(){
     std::cout << "Take multiple pair data points that have the same postion but opposite angles" << std::endl;
     std::cout << "Press c to take a point" << std::endl;
     std::cout << "Press s to calculate average center and save it" << std::endl;
+    std::cout << "Press p to print the calculated center" << std::endl;
     std::function<void(cv::Mat&)> Process = [=](cv::Mat& frame) {
             centerCalibrationProccess(frame);
     };

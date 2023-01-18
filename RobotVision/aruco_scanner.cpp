@@ -20,14 +20,6 @@ void ArucoScanner::showCamErrorMassage() {
     exit(1);
 }
 
-template<typename T>
-std::vector<T> findDiff(std::vector<T> x, std::vector<T> y) {        // no-ref, no-const
-    std::vector<T> diff;
-    std::sort(x.begin(), x.end());
-    std::sort(y.begin(), y.end());
-    std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::back_inserter(diff));
-    return diff;
-}
 
 void ArucoScanner::showTransformationInfo(const cv::Mat &frame) {
     if (translationVectors.size().width > 0) {

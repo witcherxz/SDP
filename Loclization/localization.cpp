@@ -6,11 +6,10 @@ Localization::Localization(){
     std::cout << "press i in the ground truth" << std::endl;
     std::function<void(cv::Mat &)> trackProccess = [=](cv::Mat& frame) {
         arucoScanner.estimateMarkersPose(frame);
-        if (!arucoScanner.isArucoFound())
-        {
+        if (!arucoScanner.isArucoFound()){
             return;
         }
-        
+        arucoScanner.drawArucoMarker(frame);
         if(!isInit){
             setInitialPose();
         }else{
@@ -21,23 +20,32 @@ Localization::Localization(){
 }
 void Localization::tracker(){
     updateTrack();
-    
     std::cout << "Pose : " << track << std::endl;
     
+}
+cv::Point_<double> Localization::getPostion(){
+    cv::Point_<double> initPose = arucoScanner.getPostion(trackedMarker);
+    double r = (orientation - arucoScanner.getOrientation(trackedMarker)) * (PI/180);
+    double x = initPose.x;
+    double y = initPose.y;
+    double nx = x;//cos(r)*x - sin(r)*y;
+    double ny = y;//sin(r)*x + cos(r)*y;
+    return cv::Point_<double>(nx, ny);
 }
 void Localization::updateTrack(){
     int closestMarker = arucoScanner.getIdOfClosestMarker();
     if(trackedMarker != closestMarker){
         trackedMarker = closestMarker;
-        rootOffset = track - arucoScanner.getPostion(trackedMarker);
+        rootOffset = track - getPostion();
     }
-    track = arucoScanner.getPostion(trackedMarker) + rootOffset; 
+    track = getPostion() + rootOffset; 
 }
 void Localization::setInitialPose(){
     char input = cv::waitKey(1);
     if(input == 'i'){
         trackedMarker = arucoScanner.getIdOfClosestMarker();
         rootOffset = -arucoScanner.getPostion(trackedMarker);
+        orientation = arucoScanner.getOrientation(trackedMarker);
         track = cv::Point_<double>(0, 0);
         isInit = true;
     }

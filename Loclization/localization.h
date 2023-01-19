@@ -5,11 +5,13 @@ class Localization{
     cv::Point_<double> rootOffset;
     cv::Point_<double> track;
     cv::Point_<double> groundTruth;
+    double orientation;
+    bool isInit = false;
+    int trackedMarker;
+    cv::Point_<double> getPostion();
     void setInitialPose();
     void tracker();
     void updateTrack();
-    bool isInit = false;
-    int trackedMarker;
     public:
         Localization();
 };

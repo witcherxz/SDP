@@ -19,5 +19,6 @@ class PoseCollection {
         void saveSystemCalibration();
         void pushCameraRecords();
         void pushRealRecord();
+        void popRecord();
 };
 #endif // ROBOTVISION_POSECOLLECTION_H

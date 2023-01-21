@@ -15,10 +15,24 @@ void PoseCollection::startPoseCollection(){
         case 's':
             saveSystemCalibration();
             break;
+        case 'r':
+            popRecord();
         }
     };
         as.openCamera(collectionProcess);
 }
+
+void PoseCollection::popRecord(){
+    pose_t record = realRecord.back();
+    realRecord.pop_back();
+    std::vector<int> detectedMarkers = detectedMarkersRecord.back();
+    for(int id : detectedMarkers){
+        cameraRecord[id].pop_back();
+    }
+    detectedMarkersRecord.pop_back();
+    printf("removed record : {x : %f, y : %f, theta : %f}", std::get<0>(record), std::get<1>(record), std::get<2>(record));
+}
+
 
 void PoseCollection::saveSystemCalibration(){
     cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
@@ -83,8 +97,10 @@ void PoseCollection::pushCameraRecords(){
 }
 double getUserInput(){
     std::string buff;
+
     while (true)
     {
+        std::cin >> buff;
         try{
             return std::stod(buff); 
         }

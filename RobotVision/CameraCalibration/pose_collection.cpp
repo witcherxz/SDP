@@ -81,19 +81,27 @@ void PoseCollection::pushCameraRecords(){
         }
         detectedMarkersRecord.push_back(detectedMarkers);
 }
-
+double getUserInput(){
+    std::string buff;
+    while (true)
+    {
+        try{
+            return std::stod(buff); 
+        }
+        catch(...){
+            std::cout << "Invalid input, try again.\n";
+        }
+    }
+}
 void PoseCollection::pushRealRecord(){
     std::string buff;
     double x, y, theta;
-    // std::cout << "Enter x :" << std::endl;
-    // std::cin >> buff;
-    x = 0;//std::stod(buff);
-    // std::cout << "Enter y :" << std::endl;
-    // std::cin >> buff;
-    y = 0;//std::stod(buff);
-    std::cout << "Enter theta:" << std::endl;
-    std::cin >> buff;
-    theta = std::stod(buff);
+    std::cout << "Enter x : " << std::endl;
+    x = getUserInput();
+    std::cout << "Enter y : " << std::endl;
+    y = getUserInput();
+    std::cout << "Enter theta : " << std::endl;
+    theta = getUserInput();
     pose_t record = std::make_tuple(x, y, theta);
     realRecord.push_back(record);
 }

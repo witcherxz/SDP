@@ -195,7 +195,7 @@ void CameraCenterCalibration::addPoint(){
     if(arucoScanner.isArucoFound()){
         std::tie(x, y, z) = arucoScanner.getOriginalPosition(arucoScanner.getIdOfClosestMarker());
         if(!isOpposite){
-            std::cout << "point is taken " << std::endl;
+            std::cout << "base point is taken " << std::endl;
             points.push_back(std::make_tuple(x, y));
         }else{
             std::cout << "opposite point is taken " << std::endl;
@@ -211,7 +211,7 @@ void CameraCenterCalibration::addPoint(){
 
 void CameraCenterCalibration::popPoint(){
     if(isOpposite){
-        std::cout << "point is removed " << std::endl;
+        std::cout << "base point is removed " << std::endl;
         points.pop_back();
     }else{
         std::cout << "opposite point is removed " << std::endl;

@@ -10,6 +10,8 @@
 #include <opencv2/highgui.hpp>
 #include <unordered_map>
 
+const double PI  =3.141592653589793238463;
+
 class ArucoScanner{
     public:
         typedef cv::Mat_<cv::Vec3d> vecs3d;
@@ -18,13 +20,15 @@ class ArucoScanner{
         void monitorArucoMarkers(bool showCamera=true);
         std::vector<int> getDetectedMarkers();
         cv::Point_<double> getPostion(int markerId);
-        std::tuple<double, double> getOriginalPosition(int markerId);
+        std::tuple<double, double, double> getOriginalPosition(int markerId);
+        std::tuple<double, double, double> getOriginalOrientation(int markerId);
         double getOrientation(int markerId);
         void proccessFrameOnAruco(std::function<void(cv::Mat&)> func);
         void openCamera(std::function<void(cv::Mat&)> func, bool showCamera=true);
         bool isArucoFound();
         int getIdOfClosestMarker();
         int getNumberOfAruco();
+        void drawArucoMarker(cv::Mat& frame);
 
     private:
     
@@ -32,6 +36,8 @@ class ArucoScanner{
         std::vector<int> markerIds;
         vecs3d translationVectors;
         vecs3d rotationVectors;
+        vecs3d prevTranslationVectors;
+        vecs3d prevRotationVectors;
         std::unordered_map<int,std::vector<double>> xytheta;
         cv::Mat cameraMatrix, distortionCoefficients;
         cv::aruco::Dictionary markerDictionary;
@@ -41,8 +47,6 @@ class ArucoScanner{
         std::vector<int> oldDetectedMarker;
         int idsVectorSize = 0;
         cv::Mat flipPitch = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, -1, 0, 0, 0, -1);
-        
-        void drawArucoMarker(cv::Mat& frame);
         void showCamErrorMassage();
         void showTransformationInfo(const cv::Mat &frame);
         void poseCorrection();

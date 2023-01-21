@@ -27,6 +27,7 @@ class CameraCenterCalibration {
     void calculateCenter();
     void saveCalibration();
     void addPoint();
+    void popPoint();
     public:
         void centerCalibration();
         static std::tuple<double, double> loadCameraCenter();

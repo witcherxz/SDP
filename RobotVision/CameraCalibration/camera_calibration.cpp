@@ -209,6 +209,17 @@ void CameraCenterCalibration::addPoint(){
 
 }
 
+void CameraCenterCalibration::popPoint(){
+    if(isOpposite){
+        std::cout << "point is removed " << std::endl;
+        points.pop_back();
+    }else{
+        std::cout << "opposite point is removed " << std::endl;
+        oppositePoints.pop_back();
+    }
+    isOpposite = !isOpposite;
+}
+
 void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
     arucoScanner.estimateMarkersPose(frame);
     if(arucoScanner.isArucoFound()){
@@ -225,8 +236,9 @@ void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
     }else if (input == 'p'){
         calculateCenter();
         std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
+    }else if (input == 'r'){
+        popPoint();
     }
-    
 }
 
 void CameraCenterCalibration::centerCalibration(){

@@ -168,6 +168,7 @@ void CameraCenterCalibration::saveCalibration(){
     }
     fs << "cx" << cx;
     fs << "cy" << cy;
+    std::cout << "Center is saved at : " << filePath << std::endl;
 }
 
 void CameraCenterCalibration::calculateCenter(){
@@ -222,6 +223,7 @@ void CameraCenterCalibration::popPoint(){
 
 void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
     arucoScanner.estimateMarkersPose(frame);
+    arucoScanner.drawArucoMarker(frame);
     if(arucoScanner.isArucoFound()){
         angle = arucoScanner.getOrientation(arucoScanner.getIdOfClosestMarker());
         showAngleInfo(frame);

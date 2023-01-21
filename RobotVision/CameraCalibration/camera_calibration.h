@@ -9,9 +9,7 @@
 typedef std::tuple<double, double, double, double, double, double> c_record_t;
 typedef std::tuple<double, double, double> r_record_t;
 
-void startPosCollection();
 bool loadCameraCalibration(std::string path, cv::Mat &camMatrix, cv::Mat &distCoeffs);
-void saveSystemCalibration(const std::string &filename, const std::vector<r_record_t> &real, const std::vector<c_record_t> &camera);
 
 void startCameraCalibration();
 
@@ -25,7 +23,6 @@ class CameraCenterCalibration {
     std::vector<std::tuple<double, double>> oppositePoints;
     ArucoScanner arucoScanner = ArucoScanner();
     void showAngleInfo(cv::Mat frame);
-    void intrinsicCalibration();
     void centerCalibrationProccess(cv::Mat& frame);
     void calculateCenter();
     void saveCalibration();

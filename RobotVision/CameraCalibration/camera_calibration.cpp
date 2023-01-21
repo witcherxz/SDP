@@ -66,49 +66,7 @@ void testReadFile(const string filename){
     cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
     std::cout << fs.getFirstTopLevelNode().name() << std::endl;
 }
-void saveSystemCalibration(const string &filename, const vector<r_record_t> &real,const std::vector<std::vector<int>> listOfMarkerIds ,const std::map<int ,std::vector<c_record_t>> &camera){
-    cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
-    if(!fs.isOpened()){
-        std::cout << "Could not open file :" << fs.NAME_EXPECTED << std::endl;
-        exit(1);
-    }
-    fs.startWriteStruct("real", cv::FileNode::SEQ);
-    // fs << real;
-    for(int i = 0; i < real.size(); i++)
-    {
-        double x, y, theta;
-        std::tie(x, y, theta) = real[i];
-        fs.startWriteStruct("", cv::FileNode::MAP);
-        fs << "ids" << listOfMarkerIds[i];
-        fs << "x" << x;
-        fs << "y" << y;
-        fs << "theta" << theta;
-        fs.endWriteStruct();
-    }
-    fs.endWriteStruct();
-    fs.startWriteStruct("camera", cv::FileNode::MAP);
-    // fs << camera;
-    for(auto pair : camera)
-    {
-        int id = pair.first;
-        fs.startWriteStruct("_"+std::to_string(id), cv::FileNode::SEQ);
-        for(auto pos : pair.second)
-        {
-            double x, y, z, thetaX, thetaY, thetaZ;
-            std::tie(x, y, z, thetaX, thetaY, thetaZ) = pos;
-            fs.startWriteStruct("", cv::FileNode::MAP);
-            fs << "x" << x;
-            fs << "y" << y;
-            fs << "z" << z;
-            fs << "thetaX" << thetaX;
-            fs << "thetaY" << thetaY;
-            fs << "thetaZ" << thetaZ;
-            fs.endWriteStruct();
-        }
-        fs.endWriteStruct();
-    }
-    fs.endWriteStruct();
-}
+
 
 bool loadCameraCalibration(string path, Mat &camMatrix, Mat &distCoeffs) {
     FileStorage fs(path, FileStorage::READ);
@@ -120,7 +78,7 @@ bool loadCameraCalibration(string path, Mat &camMatrix, Mat &distCoeffs) {
 }
 
 void saveFrame(const Mat &frame, vector<Mat> &saveImages) {
-Mat temp;
+    Mat temp;
     frame.copyTo(temp);
     saveImages.push_back(temp);
 }
@@ -167,29 +125,7 @@ void showNumberOfImagesTaken(const Mat frame, int imagesCounter) {
     counterLabel << "Number of images taken : " << imagesCounter;
     putText(frame, counterLabel.str(), Point2i(100, frame.cols - 900), FONT_HERSHEY_PLAIN, 5, Scalar(0, 255, 0));
 }
-void pushCameraRecords(std::map<int ,std::vector<c_record_t>> &cameraRecords,std::vector<int> ids,std::vector<cv::Vec3d> rVecs, std::vector<cv::Vec3d> tVecs){
-    for (int i = 0; i < tVecs.size(); i++)
-    {
-        c_record_t record = std::make_tuple(tVecs[i][0], tVecs[i][1], tVecs[i][2], rVecs[i][0], rVecs[i][1], rVecs[i][2]);
-        cameraRecords[ids[i]].push_back(record);
-    }
-}
-void pushRealRecord(std::vector<r_record_t>& real){
-    // std::vector<std::string> names{"x", "y" ,"theta"};
-    std::string buff;
-    double x, y, theta;
-    std::cout << "Enter x :" << std::endl;
-    std::cin >> buff;
-    x = std::stod(buff);
-    std::cout << "Enter y :" << std::endl;
-    std::cin >> buff;
-    y = std::stod(buff);
-    std::cout << "Enter theta:" << std::endl;
-    std::cin >> buff;
-    theta = std::stod(buff);
-    r_record_t realRecord = std::make_tuple(x, y, theta);
-    real.push_back(realRecord);
-}
+
 
 
 
@@ -253,18 +189,24 @@ void CameraCenterCalibration::calculateCenter(){
     cx = avgcx / n;
     cy = avgcy / n;
 }
+
 void CameraCenterCalibration::addPoint(){
-    double x, y;
-    std::tie(x, y) = arucoScanner.getOriginalPosition(arucoScanner.getIdOfClosestMarker());
-    if(!isOpposite){
-        std::cout << "point is taken " << std::endl;
-        points.push_back(std::make_tuple(x, y));
+    double x, y, z;
+    if(arucoScanner.isArucoFound()){
+        std::tie(x, y, z) = arucoScanner.getOriginalPosition(arucoScanner.getIdOfClosestMarker());
+        if(!isOpposite){
+            std::cout << "point is taken " << std::endl;
+            points.push_back(std::make_tuple(x, y));
+        }else{
+            std::cout << "opposite point is taken " << std::endl;
+            oppositePoints.push_back(std::make_tuple(x, y));
+        }
+        std::cout << "x : " << x << ", y : " << y << std::endl;
+        isOpposite = !isOpposite;
     }else{
-        std::cout << "opposite point is taken " << std::endl;
-        oppositePoints.push_back(std::make_tuple(x, y));
+        std::cout << "Marker is not found" << std::endl;
     }
-    std::cout << "x : " << x << ", y : " << y << std::endl;
-    isOpposite = !isOpposite;
+
 }
 
 void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
@@ -272,18 +214,19 @@ void CameraCenterCalibration::centerCalibrationProccess(cv::Mat& frame){
     if(arucoScanner.isArucoFound()){
         angle = arucoScanner.getOrientation(arucoScanner.getIdOfClosestMarker());
         showAngleInfo(frame);
-        char input;
-        input = cv::waitKey(1);
-        if(input == 'c'){
-            addPoint();
-        }else if(input == 's'){
-            calculateCenter();
-            saveCalibration();
-        }else if (input == 'p'){
-            calculateCenter();
-            std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
-        }
     }
+    char input;
+    input = cv::waitKey(1);
+    if(input == 'c'){
+        addPoint();
+    }else if(input == 's'){
+        calculateCenter();
+        saveCalibration();
+    }else if (input == 'p'){
+        calculateCenter();
+        std::cout << "cx : " << cx << ", cy : " << cy << std::endl;
+    }
+    
 }
 
 void CameraCenterCalibration::centerCalibration(){

@@ -1,0 +1,56 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_4a94d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_4a94d.dir/build.make CMakeFiles/cmTC_4a94d.dir/build
+make[1]: Entering directory '/home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4a94d.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_4a94d.dir/CheckSymbolExists.c.o   -c /home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_4a94d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4a94d.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_4a94d.dir/CheckSymbolExists.c.o  -o cmTC_4a94d 
+CMakeFiles/cmTC_4a94d.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x14): undefined reference to `pthread_create'
+CheckSymbolExists.c:(.text+0x18): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_4a94d.dir/build.make:97: recipe for target 'cmTC_4a94d' failed
+make[1]: *** [cmTC_4a94d] Error 1
+make[1]: Leaving directory '/home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_4a94d/fast' failed
+make: *** [cmTC_4a94d/fast] Error 2
+
+File /home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_360eb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_360eb.dir/build.make CMakeFiles/cmTC_360eb.dir/build
+make[1]: Entering directory '/home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_360eb.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_360eb.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_360eb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_360eb.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_360eb.dir/CheckFunctionExists.c.o  -o cmTC_360eb -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_360eb.dir/build.make:97: recipe for target 'cmTC_360eb' failed
+make[1]: *** [cmTC_360eb] Error 1
+make[1]: Leaving directory '/home/ceies/t05/SDP/RobotController/build/navgation/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_360eb/fast' failed
+make: *** [cmTC_360eb/fast] Error 2
+
+

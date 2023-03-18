@@ -1,0 +1,3 @@
+[ 50%] [32mBuilding CXX object CMakeFiles/localaization_node.dir/src/localization.cpp.o[0m
+[100%] [32m[1mLinking CXX executable /home/ceies/t05/SDP/RobotController/devel/.private/localaization/lib/localaization/localaization_node[0m
+[100%] Built target localaization_node

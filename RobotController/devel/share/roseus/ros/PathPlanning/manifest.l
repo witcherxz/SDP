@@ -1,0 +1,1 @@
+/home/ceies/t05/SDP/RobotController/devel/.private/PathPlanning/share/roseus/ros/PathPlanning/manifest.l

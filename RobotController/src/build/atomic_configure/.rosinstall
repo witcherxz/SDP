@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ceies/t05/catkin_ws/src/build/devel/setup.sh

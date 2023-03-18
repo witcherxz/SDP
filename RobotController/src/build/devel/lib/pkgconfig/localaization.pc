@@ -1,0 +1,8 @@
+prefix=/home/ceies/t05/catkin_ws/src/build/devel
+
+Name: localaization
+Description: Description of localaization
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -18,6 +18,7 @@ ArucoScanner::ArucoScanner(){
     cv::Ptr<cv::aruco::DetectorParameters> detectorParams = cv::aruco::DetectorParameters::create();
     // detectorParams->adaptiveThreshConstant = 4;
     detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
+    detectorParams->adaptiveThreshWinSizeMin = 5;
     cv::Ptr<cv::aruco::Dictionary> markerDictionary = cv::aruco::getPredefinedDictionary(constants::dictionaryName);
     arucoDetector = cv::aruco::ArucoDetector(markerDictionary, detectorParams);
     double cx, cy;
@@ -56,8 +57,14 @@ void ArucoScanner::openCamera(std::function<void(cv::Mat&)> func, bool showCamer
 }
 
 void ArucoScanner::drawArucoMarker(cv::Mat& frame){
-    // cv::aruco::drawDetectedMarkers(frame, markerCorners);
+    cv::aruco::drawDetectedMarkers(frame, markerCorners);
     for (int i = 0; i < markerIds.size(); i++) {
+        for (int j = 0; j < markerCorners[i].size(); j++)
+        {
+            // printf("x: %f, y: %f\n", markerCorners[i][j].x, markerCorners[i][j].y);
+            cv::circle(frame, markerCorners[i][j], 10.5, cv::Scalar(0));
+        }
+        
         cv::Vec3d vec({rotationVectors(i)[0], rotationVectors(i)[1], rotationVectors(i)[2]});
         drawFrameAxes(frame, cameraMatrix, distortionCoefficients, vec, translationVectors(i),
         constants::arucoSquareDimension);
@@ -95,9 +102,9 @@ cv::Mat rotationMatrixToEulerAngles(cv::Mat R){
 }
 
 void ArucoScanner::addPose(double x, double y, double angle, int markerId){
-    double alpha = 0.9;
+    double alpha = 0.90;
     double threshold = 5;
-    if(angle < threshold || (angle + threshold) > 360) alpha = 0; // To fix average of 360-0 wrap around angle
+    // if(angle < threshold || (angle + threshold) > 360) alpha = 0; // To fix average of 360-0 wrap around angle
     if(xytheta.count(markerId) > 0){
         xytheta[markerId][0] = xytheta[markerId][0]*alpha + x * (1-alpha);
         xytheta[markerId][1] = xytheta[markerId][1]*alpha + y * (1-alpha);
@@ -116,54 +123,47 @@ void ArucoScanner::poseCorrection(){
         cv::Rodrigues(rotationVectors(i), R_ct);
         cv::Mat R =  R_ct.t();
         orientation = rotationMatrixToEulerAngles(R);
-        if(orientation(2, 0) < 0) {
-            orientation(2, 0) = orientation(2, 0) + 360;
+        // if(orientation(2, 0) < 0) {
+        //     orientation(2, 0) = orientation(2, 0) + 360;
+        // }
+        double yaw = orientation(2, 0) ;//* (PI / 180);
+        double pitch = orientation(0, 0);// * (PI / 180);
+        double roll = orientation(1, 0);// * (PI / 180);
+        // std::cout << yaw << ", " << pitch << ", " << roll << "\n";
+        if(pitch < 0) {
+            pitch = pitch + 360;
         }
-        double yaw = -orientation(2, 0) * (PI / 180);
-        double pitch = orientation(0, 0);
-        double roll = orientation(1, 0);
-        printf("pitch: %.2f, roll : %.2f, yaw : %.2f\r", pitch, roll, yaw * (180/PI));
-        cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(yaw), -sin(yaw ), 0, sin(yaw), cos(yaw  ), 0, 0,0,1);
-        cv::Mat_<double> fixedPose = zRotation.t() * (translationVectors(i) - center);
-        fixedPose = fixedPose + center;
-        if(orientation(2, 0) < 0) {
-            orientation(2, 0) = orientation(2, 0) + 360;
-        }
+        double remPitch = 180 - pitch;
+        cv::Mat_<double> fixedPose = -R * translationVectors(i);
+        // cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(yaw), -sin(yaw), 0, sin(yaw), cos(yaw), 0, 0,0,1);
+        // cv::Mat_<double> fixedPose = zRotation.t() * (translationVectors(i) );//- center);
+        fixedPose = fixedPose;// + center;
+        // if(cv::waitKey(1) == 'p') printf("id: %d, x: %.2f, y: %.2f\n", markerIds[i], fixedPose(0, 0), fixedPose(1, 0));
         addPose(fixedPose(0, 0), fixedPose(1, 0), orientation(2, 0), markerIds[i]); 
     }
 }
 void ArucoScanner::estimateMarkersPose(const cv::Mat frame){
-    
-    // Set coordinate system
-    cv::Mat objPoints(4, 1, CV_32FC3);
-    float markerLength = constants::arucoSquareDimension;
-    objPoints.ptr<cv::Vec3f>(0)[0] = cv::Vec3f(-markerLength/2.f, markerLength/2.f, 0);
-    objPoints.ptr<cv::Vec3f>(0)[1] = cv::Vec3f(markerLength/2.f, markerLength/2.f, 0);
-    objPoints.ptr<cv::Vec3f>(0)[2] = cv::Vec3f(markerLength/2.f, -markerLength/2.f, 0);
-    objPoints.ptr<cv::Vec3f>(0)[3] = cv::Vec3f(-markerLength/2.f, -markerLength/2.f, 0);
     arucoDetector.detectMarkers(frame, markerCorners, markerIds);
-    
+    // cv::draw
     if(markerIds.size() > 0){
-        
         vecs3d rvecs(cv::Size(3, markerIds.size())), tvecs(cv::Size(3, markerIds.size()));
         cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix, distortionCoefficients, 
         rvecs, tvecs);
-        // for (size_t i = 0; i < markerIds.size(); i++)
-        // {
-        //     solvePnP(objPoints, markerCorners.at(i), cameraMatrix, distortionCoefficients, rvecs.at<cv::Vec3d>(i), tvecs.at<cv::Vec3d>(i));
-        //     // printf("pose : {x : %0.2f, y : %0.2f, z : %0.2f, thetaX : %0.2f, thetaY : %0.2f, thetaZ : %0.2f,}\n", tvecs.at<cv::Vec3d>(i)[0], tvecs.at<cv::Vec3d>(i)[1], tvecs.at<cv::Vec3d>(i)[2], rvecs.at<cv::Vec3d>(i)[0], rvecs.at<cv::Vec3d>(i)[1], rvecs.at<cv::Vec3d>(i)[2]);
-        // }
-        
         translationVectors = tvecs;
         rotationVectors = rvecs;
+        
         poseCorrection();
     }
 }
 
 void ArucoScanner::monitorArucoMarkers(bool showCamera){
     std::function<void(cv::Mat &)> arucoMarkerDrawProccess = [=](cv::Mat& frame) {
-        estimateMarkersPose(frame);
-        drawArucoMarker(frame);
+        cv::Mat ud_frame;
+        cv::undistort(frame, ud_frame, cameraMatrix, distortionCoefficients);
+
+        estimateMarkersPose(ud_frame);
+        drawArucoMarker(ud_frame);
+        frame = ud_frame;
     };
     openCamera(arucoMarkerDrawProccess, showCamera);
 }

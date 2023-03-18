@@ -14,13 +14,24 @@
 #include "RobotVision/Map/a_star.cpp"
 #include "RobotVision/aruco_gnerator.h"
 #include "RobotVision/opencv_constants.h"
+#include "Loclization/localization.h"
+#include "RobotVision/CameraCalibration/pose_collection.h"
 
+// void test(){
+//   ArucoScanner as = ArucoScanner();
+//   std::function<void(cv::Mat &)> testProccess = [=](cv::Mat& frame) {
+//         cv::cv
+//     };
+//   as.openCamera(testProccess);
+// }
 int main(int argc, char **argv) {
-  // startPosCollection();
   //  startCameraCalibration();
-  // ArucoScanner as = ArucoScanner();
+  ArucoScanner as = ArucoScanner();
   // as.monitorArucoMarkers();
   CameraCenterCalibration cc = CameraCenterCalibration();
-  cc.centerCalibration();
+  // cc.centerCalibration();
+  // Localization loc = Localization();
+  PoseCollection pc = PoseCollection();
+  pc.startPoseCollection();
   return 0;
 }

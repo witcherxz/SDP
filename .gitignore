@@ -41,3 +41,4 @@ cmake*/
 
 # camera meta data
 *.json
+*.csv

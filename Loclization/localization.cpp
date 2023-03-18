@@ -20,7 +20,7 @@ Localization::Localization(){
 }
 void Localization::tracker(){
     updateTrack();
-    std::cout << "Pose : " << track << std::endl;
+    printf("Pose { x: %.0f, y: %.0f }\n", track.x, track.y);
     
 }
 cv::Point_<double> Localization::getPostion(){
@@ -40,6 +40,7 @@ void Localization::updateTrack(){
     }
     track = getPostion() + rootOffset; 
 }
+
 void Localization::setInitialPose(){
     char input = cv::waitKey(1);
     if(input == 'i'){

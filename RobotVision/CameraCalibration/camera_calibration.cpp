@@ -96,7 +96,7 @@ void calibrateCameraFromSavedImages(Mat &cameraMatrix, Mat &distortionCoefficien
 void saveImagesInLocalStorage(std::vector<cv::Mat> images){
     for(int i = 0; i < images.size(); i++)
     {   std::string path = constants::calibrationImagesFolder + "\\" + std::to_string(i) + ".jpeg";
-        cv::imwrite(path, images[i]);
+        if(!cv::imwrite(path, images[i])) exit(1);
     }
 }
 void executeKeyCommand(const Mat &frame, Mat &cameraMatrix, Mat &distortionCoefficients, vector<Mat> &saveImages,

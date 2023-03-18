@@ -5,12 +5,18 @@
 void PoseCollection::startPoseCollection(){
     std::function<void(cv::Mat&)> collectionProcess = [=](cv::Mat& frame) {
         as.estimateMarkersPose(frame);
+        as.drawArucoMarker(frame);
         char input = cv::waitKey(1);
         switch (input)
         {
         case ' ':
             pushCameraRecords();
             pushRealRecord();
+            break;
+        case 'a':
+            this->theta += 90;
+            pushCameraRecords();
+            pushRealThetaRecord();
             break;
         case 's':
             saveSystemCalibration();
@@ -112,12 +118,23 @@ double getUserInput(){
 void PoseCollection::pushRealRecord(){
     std::string buff;
     double x, y, theta;
-    std::cout << "Enter x : " << std::endl;
+    std::cout << "\nEnter x : " << std::endl;
     x = getUserInput();
-    std::cout << "Enter y : " << std::endl;
+    std::cout << "\nEnter y : " << std::endl;
     y = getUserInput();
-    std::cout << "Enter theta : " << std::endl;
+    std::cout << "\nEnter theta : " << std::endl;
     theta = getUserInput();
     pose_t record = std::make_tuple(x, y, theta);
     realRecord.push_back(record);
+    this->x = x;
+    this->y = y;
+    this->theta = theta;
+}
+
+void PoseCollection::pushRealThetaRecord(){
+    std::string buff;
+    double x, y, theta;
+    pose_t record = std::make_tuple(this->x, this->y, this->theta);
+    realRecord.push_back(record);
+    printf("Snapshot taken at angle : %.0f\n", this->theta);
 }

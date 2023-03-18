@@ -9,6 +9,9 @@ class PoseCollection {
     public:
         void startPoseCollection();
     private:
+        double x, y;
+        int c = 0;
+        double theta = 0;
         typedef std::tuple<double, double, double> pose_t;
         typedef std::vector<double> c_pose_t;
         std::unordered_map<int, std::vector<c_pose_t>> cameraRecord;
@@ -19,6 +22,7 @@ class PoseCollection {
         void saveSystemCalibration();
         void pushCameraRecords();
         void pushRealRecord();
+        void pushRealThetaRecord();
         void popRecord();
 };
 #endif // ROBOTVISION_POSECOLLECTION_H

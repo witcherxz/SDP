@@ -35,5 +35,9 @@
 .*/
 cmake*/
 /build
+/devel
 /.vscode
 *ipynb
+
+# camera meta data
+*.json

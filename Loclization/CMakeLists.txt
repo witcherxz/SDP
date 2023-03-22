@@ -6,7 +6,7 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp ./RobotVision/opencv_constants.cpp
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS} cameraCalibration map mapCreator mapViewer aStar arucoGnerator arucoScanner localization poseCollection)
+target_link_libraries(${CMAKE_PROJECT_NAME} arucoScanner cameraCalibration map mapCreator mapViewer aStar arucoGnerator localization poseCollection ${OpenCV_LIBS})
 
 add_subdirectory(RobotVision)
 add_subdirectory(Loclization)

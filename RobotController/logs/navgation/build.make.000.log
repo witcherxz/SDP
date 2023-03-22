@@ -1,6 +1,0 @@
-[ 20%] [32mBuilding CXX object CMakeFiles/navgation_node.dir/src/navigate.cpp.o[0m
-[ 40%] [32mBuilding CXX object CMakeFiles/navgation_node.dir/src/map.cpp.o[0m
-[ 60%] [32mBuilding CXX object CMakeFiles/navgation_node.dir/src/map_creator.cpp.o[0m
-[ 80%] [32mBuilding CXX object CMakeFiles/navgation_node.dir/src/a_star.cpp.o[0m
-[100%] [32m[1mLinking CXX executable /home/ceies/t05/SDP/RobotController/devel/.private/navgation/lib/navgation/navgation_node[0m
-[100%] Built target navgation_node

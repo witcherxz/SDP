@@ -6,7 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "RobotVision/cameraCalibration/camera_calibration.h"
+#include "RobotVision/CameraCalibration/camera_calibration.h"
 #include "RobotVision/aruco_scanner.h"
 #include "RobotVision/Map/map.h"
 #include "RobotVision/Map/map_creator.h"
@@ -27,7 +27,7 @@
 int main(int argc, char **argv) {
   //  startCameraCalibration();
   ArucoScanner as = ArucoScanner();
-  // as.monitorArucoMarkers();
+  as.monitorArucoMarkers();
   CameraCenterCalibration cc = CameraCenterCalibration();
   // cc.centerCalibration();
   // Localization loc = Localization();

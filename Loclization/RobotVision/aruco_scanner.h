@@ -40,9 +40,6 @@ class ArucoScanner{
         vecs3d prevRotationVectors;
         std::unordered_map<int,std::vector<double>> xytheta;
         cv::Mat cameraMatrix, distortionCoefficients;
-        cv::aruco::Dictionary markerDictionary;
-        cv::aruco::DetectorParameters detectorParams;
-        cv::aruco::ArucoDetector arucoDetector;
         std::vector<std::vector<cv::Point2f>> markerCorners;
         std::vector<int> oldDetectedMarker;
         int idsVectorSize = 0;

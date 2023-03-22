@@ -34,11 +34,13 @@
 # build files
 .*/
 cmake*/
-/build
-/devel
-/.vscode
+build/
+devel/
+logs/
+.vscode/
 *ipynb
 
 # camera meta data
 *.json
+!CMakePresets.json
 *.csv

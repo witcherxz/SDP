@@ -17,13 +17,6 @@
 #include "Loclization/localization.h"
 #include "RobotVision/CameraCalibration/pose_collection.h"
 
-// void test(){
-//   ArucoScanner as = ArucoScanner();
-//   std::function<void(cv::Mat &)> testProccess = [=](cv::Mat& frame) {
-//         cv::cv
-//     };
-//   as.openCamera(testProccess);
-// }
 int main(int argc, char **argv) {
   //  startCameraCalibration();
   ArucoScanner as = ArucoScanner();
@@ -32,6 +25,6 @@ int main(int argc, char **argv) {
   // cc.centerCalibration();
   // Localization loc = Localization();
   PoseCollection pc = PoseCollection();
-  pc.startPoseCollection();
+  // pc.startPoseCollection();
   return 0;
 }

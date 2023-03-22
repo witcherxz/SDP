@@ -113,9 +113,11 @@ void ArucoScanner::poseCorrection(){
         cv::Rodrigues(rotationVectors(i), R_ct);
         cv::Mat R =  R_ct.t();
         orientation = rotationMatrixToEulerAngles(R);
-        cv::Mat_<double> fixedPose = -R * translationVectors(i);
-        fixedPose = fixedPose;
-        addPose(fixedPose(0, 0), fixedPose(1, 0), orientation(2, 0), markerIds[i]); 
+        double yaw = orientation(2, 0) * (PI/180);
+        cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(yaw), -sin(yaw), 0, sin(yaw), cos(yaw), 0, 0,0,1);
+        cv::Mat_<double> fixedPose = -zRotation.t() * (translationVectors(i));
+        addPose(fixedPose(0, 0), fixedPose(1, 0), orientation(2, 0), markerIds[i]);
+
     }
 }
 

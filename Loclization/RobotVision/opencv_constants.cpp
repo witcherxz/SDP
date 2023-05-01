@@ -12,7 +12,6 @@
 
 namespace constants {
     std::string homedir = std::getenv("HOME");
-    extern const bool use_Gstream = true;
     extern const int cam_id = 0;
     extern const float calibrationSquareDimension = 0.025f; // in meter
     extern const float arucoSquareDimension = 20; // in cm
@@ -21,9 +20,11 @@ namespace constants {
     extern const std::string cameraCalibrationPath = homedir + "/t05/Calibration_Folder/cameraCalibration";
     extern const std::string systemCalibrationPath = homedir + "/t05/Calibration_Folder/systemCalibration.json";
     extern const std::string cameraCenterCalibrationPath = homedir + "/t05/Calibration_Folder/cameraCenterCalibration";
-    extern const std::string calibrationImagesFolder = homedir + "/t05/Calibration_Folder/calibrationImagesFolder";
+    extern const std::string calibrationImagesFolder = homedir + "/t05/Calibration_Folder/calibrationImagesFolder/";
+    extern const std::string arucosCoefPath = homedir + "/t05/Calibration_Folder/arucos_coef.json";
 
     // GStream parametars
+    extern const bool use_Gstream = true;
     extern const int capture_width = 1280 ;
     extern const int capture_height = 720 ;
     extern const int display_width = 1280 ;

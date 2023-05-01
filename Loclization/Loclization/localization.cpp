@@ -1,53 +1,69 @@
 #include "localization.h"
 #include <opencv2/highgui.hpp>
 #include <opencv2/core/types.hpp>
+#include "../RobotVision/opencv_constants.h"
 #include <iostream>
-Localization::Localization(){
-    std::cout << "press i in the ground truth" << std::endl;
-    std::function<void(cv::Mat &)> trackProccess = [=](cv::Mat& frame) {
-        arucoScanner.estimateMarkersPose(frame);
-        if (!arucoScanner.isArucoFound()){
-            return;
-        }
-        arucoScanner.drawArucoMarker(frame);
-        if(!isInit){
-            setInitialPose();
-        }else{
-            tracker();
-        }
-    };
-    arucoScanner.openCamera(trackProccess);
-}
-void Localization::tracker(){
-    updateTrack();
-    printf("Pose { x: %.0f, y: %.0f }\n", track.x, track.y);
-    
-}
-cv::Point_<double> Localization::getPostion(){
-    cv::Point_<double> initPose = arucoScanner.getPostion(trackedMarker);
-    double r = (orientation - arucoScanner.getOrientation(trackedMarker)) * (PI/180);
-    double x = initPose.x;
-    double y = initPose.y;
-    double nx = x;//cos(r)*x - sin(r)*y;
-    double ny = y;//sin(r)*x + cos(r)*y;
-    return cv::Point_<double>(nx, ny);
-}
-void Localization::updateTrack(){
-    int closestMarker = arucoScanner.getIdOfClosestMarker();
-    if(trackedMarker != closestMarker){
-        trackedMarker = closestMarker;
-        rootOffset = track - getPostion();
+#include <fstream>
+
+void saveCameraCalibration(const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs) {
+    std::cout << filename << std::endl;
+    cv::FileStorage fs(filename, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+    if(!fs.isOpened()){
+        std::cout << "Failed to open path : " << filename << std::endl;
+        exit(1);
     }
-    track = getPostion() + rootOffset; 
+    fs << "camera_matrix" << cameraMatrix;
+    fs << "distortion_coefficients" << distCoeffs;
 }
 
-void Localization::setInitialPose(){
-    char input = cv::waitKey(1);
-    if(input == 'i'){
-        trackedMarker = arucoScanner.getIdOfClosestMarker();
-        rootOffset = -arucoScanner.getPostion(trackedMarker);
-        orientation = arucoScanner.getOrientation(trackedMarker);
-        track = cv::Point_<double>(0, 0);
-        isInit = true;
-    }
+Localization::Localization(){
+    loadArucosCoef();
 }
+
+void Localization::start(bool showCamera){
+    std::function<void(cv::Mat &)> locProccess = [=](cv::Mat& frame) {
+        arucoScanner.estimateMarkersPose(frame);
+        if(showCamera) arucoScanner.drawArucoMarker(frame);
+        cv::Mat p = getPostion();
+        std::cout << p << "\n";
+    };
+    arucoScanner.openCamera(locProccess, showCamera);
+}
+
+void Localization::loadArucosCoef(){
+    cv::FileStorage fs("/home/ceies/t05/Calibration_Folder/arucos_coef.json", cv::FileStorage::READ);
+    if (!fs.isOpened())
+    {
+        std::cerr << "Failed to open file" << std::endl;
+        exit(1);
+    }
+
+    cv::FileNode rootNode = fs.root();
+    for (cv::FileNodeIterator it = rootNode.begin(); it != rootNode.end(); ++it)
+    {
+        cv::Mat matrix;
+        (*it) >> matrix;
+        int id = std::stoi((*it).name());
+        arucosCoef[id] = matrix;
+    }
+    fs.release();
+}
+
+cv::Mat Localization::getPostion(){
+    std::vector<int> ids = arucoScanner.getDetectedMarkers();
+    float waight = 1.0 / ids.size();
+    cv::Mat pose = (cv::Mat_<float>(1,2) << 0, 0);
+    for(int id : ids)
+    {
+        cv::Point_<double> p = arucoScanner.getPostion(id);
+        cv::Mat mat = (cv::Mat_<float>(3,1) << 1 , p.x, p.y);
+        if(arucosCoef.count(id) > 0){
+            cv::Mat fromGroundTruth = mat.t() * arucosCoef[id].t();
+            pose = pose + (fromGroundTruth * waight);
+        }else{
+            pose = mat;
+        }
+    }
+    return pose;
+}
+

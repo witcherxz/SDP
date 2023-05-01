@@ -9,6 +9,7 @@ namespace constants {
     extern const std::string systemCalibrationPath;
     extern const std::string calibrationImagesFolder;
     extern const std::string cameraCenterCalibrationPath;
+    extern const std::string arucosCoefPath;
     extern const bool use_Gstream;
     extern const int cam_id;
     extern const int capture_width;

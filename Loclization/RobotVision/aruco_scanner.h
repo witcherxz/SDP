@@ -18,16 +18,16 @@ class ArucoScanner{
         ArucoScanner();
         void estimateMarkersPose(cv::Mat frame);
         void monitorArucoMarkers(bool showCamera=true);
-        std::vector<int> getDetectedMarkers();
-        cv::Point_<double> getPostion(int markerId);
         std::tuple<double, double, double> getOriginalPosition(int markerId);
         std::tuple<double, double, double> getOriginalOrientation(int markerId);
-        double getOrientation(int markerId);
         void proccessFrameOnAruco(std::function<void(cv::Mat&)> func);
         void openCamera(std::function<void(cv::Mat&)> func, bool showCamera=true);
         bool isArucoFound();
+        cv::Point_<double> getPostion(int markerId);
+        std::vector<int> getDetectedMarkers();
         int getIdOfClosestMarker();
         int getNumberOfAruco();
+        double getOrientation(int markerId);
         void drawArucoMarker(cv::Mat& frame);
 
     private:

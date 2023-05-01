@@ -113,19 +113,25 @@ void ArucoScanner::poseCorrection(){
         cv::Rodrigues(rotationVectors(i), R_ct);
         cv::Mat R =  R_ct.t();
         orientation = rotationMatrixToEulerAngles(R);
-        double yaw = orientation(2, 0) * (PI/180);
-        cv::Mat_<double> zRotation = (cv::Mat_<double>(3,3) << cos(yaw), -sin(yaw), 0, sin(yaw), cos(yaw), 0, 0,0,1);
-        cv::Mat_<double> fixedPose = -zRotation.t() * (translationVectors(i));
-        addPose(fixedPose(0, 0), fixedPose(1, 0), orientation(2, 0), markerIds[i]);
-
+        double pitch = orientation(0, 0);
+        double roll = orientation(1, 0);
+        double yaw = orientation(2, 0);
+        cv::Mat_<double> fixedPose = -R * translationVectors(i);
+        double bound = 5;
+        bool outlier = ((180 - abs(pitch)) > bound || abs(roll) > bound);
+        int markerId = markerIds[i];
+        bool recorded = xytheta.count(markerId) > 0;
+        if(outlier && recorded) {
+            addPose(xytheta[markerId][0], xytheta[markerId][1],xytheta[markerId][2], markerId);
+            continue;
+        };
+        addPose(fixedPose(0, 0), fixedPose(1, 0), orientation(2, 0), markerId); 
     }
 }
 
 void ArucoScanner::estimateMarkersPose(const cv::Mat frame){
-    cv::Mat ud_frame;
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(constants::dictionaryName);
-    cv::undistort(frame, ud_frame, cameraMatrix, distortionCoefficients);
-    cv::aruco::detectMarkers(frame,dictionary ,markerCorners, markerIds);
+    cv::aruco::detectMarkers(frame ,dictionary ,markerCorners, markerIds);
     if(markerIds.size() > 0){
         vecs3d rvecs(cv::Size(3, markerIds.size())), tvecs(cv::Size(3, markerIds.size()));
         cv::aruco::estimatePoseSingleMarkers(markerCorners, constants::arucoSquareDimension, cameraMatrix, distortionCoefficients, 
@@ -138,8 +144,11 @@ void ArucoScanner::estimateMarkersPose(const cv::Mat frame){
 
 void ArucoScanner::monitorArucoMarkers(bool showCamera){
     std::function<void(cv::Mat &)> arucoMarkerDrawProccess = [=](cv::Mat& frame) {
-        estimateMarkersPose(frame);
-        drawArucoMarker(frame);
+        cv::Mat ud_frame;
+        cv::undistort(frame, ud_frame, cameraMatrix, distortionCoefficients);
+        estimateMarkersPose(ud_frame);
+        drawArucoMarker(ud_frame);
+        ud_frame.copyTo(frame);
     };
     openCamera(arucoMarkerDrawProccess, showCamera);
 }

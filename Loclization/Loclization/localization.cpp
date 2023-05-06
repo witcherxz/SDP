@@ -25,7 +25,7 @@ void Localization::start(bool showCamera){
         arucoScanner.estimateMarkersPose(frame);
         if(showCamera) arucoScanner.drawArucoMarker(frame);
         cv::Mat p = getPostion();
-        std::cout << p << "\n";
+        std::cout << p.at<float>(0,0) << " " << p.at<float>(0, 1) << "\n";
     };
     arucoScanner.openCamera(locProccess, showCamera);
 }

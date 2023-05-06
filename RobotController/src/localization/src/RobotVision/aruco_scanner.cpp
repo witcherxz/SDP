@@ -94,12 +94,14 @@ cv::Mat rotationMatrixToEulerAngles(cv::Mat R){
 
 void ArucoScanner::addPose(double x, double y, double angle, int markerId){
     double alpha = 0.90;
+    double angle_alpha = alpha;
     double threshold = 5;
-    // if(angle < threshold || (angle + threshold) > 360) alpha = 0; // TODO: To fix average of 360-0 wrap around angle
+    if(angle < 0) angle += 360;
+    if(angle < threshold || (angle + threshold) > 360) angle_alpha = 0; // TODO: To fix average of 360-0 wrap around angle
     if(xytheta.count(markerId) > 0){
         xytheta[markerId][0] = xytheta[markerId][0]*alpha + x * (1-alpha);
         xytheta[markerId][1] = xytheta[markerId][1]*alpha + y * (1-alpha);
-        xytheta[markerId][2] = xytheta[markerId][2]*alpha + angle * (1-alpha);
+        xytheta[markerId][2] = xytheta[markerId][2]*angle_alpha + angle * (1-angle_alpha);
     }else{
         std::vector<double> pose = {x, y, angle};
         xytheta[markerId] = pose;
@@ -116,7 +118,11 @@ void ArucoScanner::poseCorrection(){
         double pitch = orientation(0, 0);
         double roll = orientation(1, 0);
         double yaw = orientation(2, 0);
-        cv::Mat_<double> fixedPose = -R * translationVectors(i);
+        // cx : -9.56429, cy : 4.70012
+        cv::Mat center = (cv::Mat_<double>(3, 1) << -9.56429, 4.70012, 0);
+        // cv::Mat_<double> fixedPose = -R * (translationVectors(i) - center);
+        // fixedPose = fixedPose + center;
+        cv::Mat_<double> fixedPose = -R * (translationVectors(i));
         double bound = 5;
         bool outlier = ((180 - abs(pitch)) > bound || abs(roll) > bound);
         int markerId = markerIds[i];

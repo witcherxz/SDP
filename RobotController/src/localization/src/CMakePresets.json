@@ -1,0 +1,40 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 0,
+      "patch": 0
+    },
+    "configurePresets": [
+      {
+        "name": "default",
+        "binaryDir" : "${sourceDir}/cmake_tools_build",
+        "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Debug"
+        }
+      },
+      {
+        "name": "windows-default",
+        "inherits" : "default",
+        "displayName": "Windows default configuration",
+        "description": "windows x64 Visual Studio 17 2022 configuration",
+        "generator": "Visual Studio 17 2022",
+        "architecture": {
+          "value": "x64",
+          "strategy": "external"
+        }
+      },
+      {
+        "name": "linux-default",
+        "inherits" : "default",
+        "displayName": "Linux default configuration",
+        "description": "Unix Makefiles configuration",
+        "generator": "Unix Makefiles",
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE":"Debug",
+            "CMAKE_C_COMPILER":"gcc",
+            "CMAKE_CXX_COMPILER":"g++"
+        }
+      }
+    ]
+  }

@@ -28,7 +28,7 @@ if(_res EQUAL 0)
   # include all.cmake without add_subdirectory to let it operate in same scope
   include(${catkin_EXTRAS_DIR}/all.cmake NO_POLICY_SCOPE)
   add_subdirectory("${_out}")
-
+  add_subdirectory(/home/ceies/t05/SDP/Loclization)
 else()
   # use either CMAKE_PREFIX_PATH explicitly passed to CMake as a command line argument
   # or CMAKE_PREFIX_PATH from the environment

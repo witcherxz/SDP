@@ -5,9 +5,9 @@ class Localization{
     cv::Point_<double> pose;
     double orientation;
     std::unordered_map<int, cv::Mat> arucosCoef;
-    cv::Mat getPostion();
     void loadArucosCoef();
     public:
+        cv::Mat getPostion();
         Localization();
         void start(bool showCamera);
 };

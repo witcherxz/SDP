@@ -1,9 +1,10 @@
-#include "map_creator.h"
+#include "../include/map_creator.h"
 #include <opencv2/core/types.hpp>
 
-MapCreator::MapCreator(GridMap map): map(map) {}
+MapCreator::MapCreator(GridMap map) : map(map) {}
 
-void MapCreator::addLine(Line line) {
+void MapCreator::addLine(Line line)
+{
     double cellSize = map.getCellSize();
     Point sp, ep;
     std::tie(sp, ep) = line.getPoints();
@@ -11,13 +12,17 @@ void MapCreator::addLine(Line line) {
     int ex, ey;
     std::tie(sx, sy) = sp.getCoordinate();
     std::tie(ex, ey) = ep.getCoordinate();
-    if (sx == ex) {
-        for(int i = sy; i <= ey; i++){
+    if (sx == ex)
+    {
+        for (int i = sy; i <= ey; i++)
+        {
             map.occupyCell(i, sx);
         }
     }
-    if (sy == ey) {
-        for(int i = sx; i <= ex; i++){
+    if (sy == ey)
+    {
+        for (int i = sx; i <= ex; i++)
+        {
             map.occupyCell(sy, i);
         }
     }

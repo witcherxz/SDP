@@ -61,6 +61,6 @@ void Odometer_Updatei(const tf2_msgs::TFMessage::ConstPtr &msg)
 int main(int argc, char **argv)
 {
   Localization loc = Localization();
-  loc.start(false);
+  loc.start(true);
   return 0;
 }

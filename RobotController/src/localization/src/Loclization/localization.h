@@ -23,7 +23,7 @@ class Localization
     ros::Subscriber odometerSubscriber;
     
     const float angleOffset = M_PI / 2;
-    bool firstTimeNewArucoDetected = false;
+    int firstTimeNewArucoDetected = 0;
     bool firstOdomRead = true;
     float x = 0;
     float y = 0;

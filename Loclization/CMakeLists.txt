@@ -10,3 +10,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME} arucoScanner cameraCalibration map m
 
 add_subdirectory(RobotVision)
 add_subdirectory(Loclization)
+
+#install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${DSDP_BIN_INSTALL_DIR})

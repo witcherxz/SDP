@@ -1,7 +1,7 @@
 #ifndef SPD_ROBOTVISION_astar_H
 #define SPD_ROBOTVISION_astar_H
 
-#include "map.h"
+#include "../include/map.h"
 #include <queue>
 #include <vector>
 #include <unordered_set>
@@ -194,7 +194,7 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
     }
     cv::Mat image_scaled;
     cv::resize(monitor, image_scaled, cv::Size(), 2, 2, cv::INTER_LINEAR);
-    cv::imshow("Monitor", image_scaled);
+    // cv::imshow("Monitor", image_scaled);
     int key = cv::waitKey(1);
   }
 }

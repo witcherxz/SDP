@@ -32,6 +32,7 @@ class Line
 {
 private:
     double length;
+    
     Point sp;
     Point ep;
 

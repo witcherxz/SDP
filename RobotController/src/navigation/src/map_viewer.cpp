@@ -4,14 +4,16 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2\imgproc.hpp>
 
-MapViewer::MapViewer(GridMap map): map(map){
+MapViewer::MapViewer(GridMap map) : map(map)
+{
 }
 
-void MapViewer::drawMap() {
+void MapViewer::drawMap()
+{
     cv::Mat mat = map.getMapCopy();
     cv::Mat dst;
-    cv::resize(mat,dst, cv::Size(), 10, 10);
-    
+    cv::resize(mat, dst, cv::Size(), 10, 10);
+
     cv::namedWindow("Display window");
     cv::imshow("Display window", dst);
     cv::waitKey(0);

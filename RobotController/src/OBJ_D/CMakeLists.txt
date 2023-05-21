@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(navgation)
+cmake_minimum_required(VERSION 3.4)
+project(OBJ_D)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -7,12 +7,15 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-)
 find_package(OpenCV REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+roscpp
+)
+
+find_package(depthai CONFIG REQUIRED)
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
+
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -36,9 +39,9 @@ find_package(OpenCV REQUIRED)
 ##     * add a exec_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
-find_package(catkin REQUIRED COMPONENTS roscpp)
+##     find_package(catkin REQUIRED COMPONENTS ...)
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
-     catkin_package(CATKIN_DEPENDS)
+##     catkin_package(CATKIN_DEPENDS ...)
 ##   * uncomment the add_*_files sections below as needed
 ##     and list every .msg/.srv/.action file to be processed
 ##   * uncomment the generate_messages entry below
@@ -101,8 +104,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
- LIBRARIES navgation
+#  INCLUDE_DIRS include
+#  LIBRARIES OBJ_D
+#  CATKIN_DEPENDS OpenCV depthai roscpp
  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
@@ -115,30 +119,53 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
-  LIBRARIES p2os_driver
   CATKIN_DEPENDS p2os_msgs nav_msgs roscpp geometry_msgs diagnostic_updater tf std_msgs kdl_parser
+  ${catkin_INCLUDE_DIRS}
+  ${OpenCV_LIBS}
+  ${Boost_INCLUDE_DIRS} 
 )
 
-include_directories(${OpenCV_INCLUDE_DIRS})
 ## Declare a C++ library
-
 # add_library(${PROJECT_NAME}
-#   src/a_star.cpp
-#   src/map.cpp
-#   src/map_creator.cpp
+#   src/${PROJECT_NAME}/OBJ_D.cpp
 # )
+find_package(OpenCV REQUIRED)
+## find_package(depthai CONFIG REQUIRED)
+
+
+# Link with libraries
+
+
+
+# Set compiler features (c++14)
+## set_property(${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/navigate.cpp src/map.cpp src/map_creator.cpp src/a_star.cpp)
+add_executable(${PROJECT_NAME}_node src/main.cpp)
+
+target_link_libraries(${PROJECT_NAME}_node
+    PRIVATE depthai::opencv
+    ${OpenCV_LIBS} # optional, used for example
+    ${catkin_LIBRARIES}
+)
+# Set some errors
+if(NOT MSVC)
+    target_compile_options(${PROJECT_NAME}_node PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror=return-type>)
+endif()
+
+# find_library(DEPTHAI_LIBRARIES NAMES depthai-core PATHS /home/ceies/t05/SDP/objectDetection/library/depthai-core/build/install/lib)
+# target_link_libraries(${PROJECT_NAME}_node PUBLIC /home/ceies/t05/SDP/objectDetection/library/depthai-core/build/install/lib)
+# target_include_directories(${PROJECT_NAME}_node PUBLIC /home/ceies/t05/SDP/objectDetection/library/depthai-core/build/install/include)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -150,10 +177,7 @@ add_executable(${PROJECT_NAME}_node src/navigate.cpp src/map.cpp src/map_creator
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-   target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-)
+
 
 #############
 ## Install ##
@@ -202,10 +226,11 @@ add_executable(${PROJECT_NAME}_node src/navigate.cpp src/map.cpp src/map_creator
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_navgation.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_OBJ_D.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+

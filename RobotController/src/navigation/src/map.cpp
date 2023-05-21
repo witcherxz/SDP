@@ -1,5 +1,5 @@
 #include <cmath>
-#include "map.h"
+#include "../include/map.h"
 #include <iostream>
 Point::Point() : x(0), y(0) {}
 Point::Point(double x, double y) { setCoordinate(x, y); }

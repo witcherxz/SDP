@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>navgation</name>
+  <name>OBJ_D</name>
   <version>0.0.0</version>
-  <description>The navgation package</description>
+  <description>The OBJ_D package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/navgation</url> -->
+  <!-- <url type="website">http://wiki.ros.org/OBJ_D</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,10 +49,16 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>OpenCV</build_depend>
+  <build_depend>depthai</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_export_depend>OpenCV</build_export_depend>
+  <build_export_depend>depthai</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
+  <exec_depend>OpenCV</exec_depend>
+  <exec_depend>depthai</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <depend>opencv</depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

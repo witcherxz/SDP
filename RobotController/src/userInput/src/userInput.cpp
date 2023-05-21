@@ -1,40 +1,99 @@
-#include <ros/ros.h>
-#include "std_msgs/String.h" 
-#include "geometry_msgs/Pose2D.h"
-
+#include "ros/ros.h"
+#include "geometry_msgs/Twist.h"
+#include "tf2_msgs/TFMessage.h"
+#include "rosgraph_msgs/Clock.h"
 #include <stdio.h>
 #include <iostream>
-#include <sstream>
 #include <math.h>
+#include <sstream>
+#include <conio.h>
 
-int main(int argc, char* argv[])
+#define KEY_UP 65
+#define KEY_DOWN 66
+#define KEY_LEFT 68
+#define KEY_RIGHT 67
+
+const double PI = 3.141592653589793238463;
+
+geometry_msgs::Twist msg;
+
+void rotate(double angular_speed, double relative_angle, bool isClockWise)
 {
-  // This must be called before anything else ROS-related
-  ros::init(argc, argv, "UserInput");
+	ros::NodeHandle n;
+	ros::Publisher path = n.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 10);
+	ros::Rate rate(50);
+	if (isClockWise)
+		msg.angular.z = abs(angular_speed);
+	else
+		msg.angular.z = -abs(angular_speed);
+	double current_angle = 0;
+	double t0 = ros::Time::now().toSec();
+	do
+	{
+		path.publish(msg);
+		double t1 = ros::Time::now().toSec();
+		current_angle = angular_speed * (t1 - t0);
+		ros::spinOnce();
+		rate.sleep();
+	} while (current_angle < relative_angle);
+	msg.angular.z = 0;
+	path.publish(msg);
+	ros::spinOnce();
+	msg.angular.z = 0;
+	msg.linear.x = 0;
+}
 
-  // Create a ROS node handle
-  ros::NodeHandle n;
-  ros::Publisher userInputs =  n.advertise<geometry_msgs::Pose2D>("finalPose", 10);
-  ros::Rate loop_rate(10);
-  geometry_msgs::Pose2D msg;
+int main(int argc, char **argv)
+{
+	// Initialize nodes
+	ros::init(argc, argv, "TrajectoryGen");
+	ros::NodeHandle node;
+	// Publisher for movement data
+	ros::Publisher pub = node.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 10);
+	double t;
 
-  while(ros::ok()){
-  std::cout<< "Enter final x postion" << std::endl;
-	std::cin >> msg.x;
-  std::cout<< "Done, Final x postion: " << msg.x << std::endl;
-  
-  std::cout<< "Enter final y postion" << std::endl;
-  std::cin >> msg.y;
-  std::cout<< "Done, Final y postion: " << msg.y << std::endl;
-  
-  std::cout<< "Enter final theta postion" << std::endl;
-	std::cin >> msg.theta;
-  std::cout<< "Done, Final theta postion: " << msg.theta << std::endl;
+	ros::Rate rate(10);
+	int c = 0;
+	msg.linear.y = 0;
+	msg.linear.z = 0;
+	msg.angular.x = 0;
+	msg.angular.y = 0;
 
-	userInputs.publish(msg);
-  std::cout<< "Msg of userinputs had been published" << std::endl;
-  ros::spinOnce();
-	loop_rate.sleep();
-  }
+	while (ros::ok())
+	{
+		switch ((c = getch()))
+		{
+		case KEY_UP:
+			std::cout << "Up" << std::endl;
+			msg.linear.x = 0.5;
+			msg.angular.z = 0;
+			pub.publish(msg);
+			rate.sleep();
+			msg.linear.x = 0;
+			msg.angular.z = 0;
+			break;
+		case KEY_DOWN:
+			std::cout << "Down" << std::endl;
+			msg.linear.x = -0.5;
+			msg.angular.z = 0;
+			pub.publish(msg);
+			rate.sleep();
+			msg.linear.x = 0;
+			msg.angular.z = 0;
+			break;
+		case KEY_LEFT:
+			std::cout << "Left" << std::endl; // key left
+			rotate(1, (90 * PI / 180), true);
+			break;
 
+		case KEY_RIGHT:
+			std::cout << "Right" << std::endl; // key right
+			rotate(1, (90 * PI / 180), false);
+			break;
+
+		default:
+			continue;
+		}
+	}
+	return 0;
 }

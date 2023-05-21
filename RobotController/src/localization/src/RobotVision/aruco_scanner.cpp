@@ -99,9 +99,9 @@ void ArucoScanner::addPose(double x, double y, double angle, int markerId){
     if(angle < 0) angle += 360;
     if(angle < threshold || (angle + threshold) > 360) angle_alpha = 0; // TODO: To fix average of 360-0 wrap around angle
     if(xytheta.count(markerId) > 0){
-        xytheta[markerId][0] = xytheta[markerId][0]*alpha + x * (1-alpha);
-        xytheta[markerId][1] = xytheta[markerId][1]*alpha + y * (1-alpha);
-        xytheta[markerId][2] = xytheta[markerId][2]*angle_alpha + angle * (1-angle_alpha);
+        xytheta[markerId][0] = x;//xytheta[markerId][0]*alpha + x * (1-alpha);
+        xytheta[markerId][1] = y;//xytheta[markerId][1]*alpha + y * (1-alpha);
+        xytheta[markerId][2] = angle;//xytheta[markerId][2]*angle_alpha + angle * (1-angle_alpha);
     }else{
         std::vector<double> pose = {x, y, angle};
         xytheta[markerId] = pose;

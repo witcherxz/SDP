@@ -106,13 +106,24 @@
         return kp_rotate;
     }
 
+    std::tuple<double, double, double> robot_controller::get_current_location(){
+        return std::make_tuple(robot_controller::Localization_x, robot_controller::Localization_y, robot_controller::Localization_theta);
+    }
+
     void robot_controller::move(double x, double y){
         ros::Rate move_rate(rate);
         double distance_to_travel = 0;
         double prev_distance_to_travel = distance_to_travel;
-        distance_to_travel = getDistance(x, y);
-        bool distance_is_decreasing = (distance_to_travel - prev_distance_to_travel) > -0.01;
-        while (distance_to_travel > tolerance_move || distance_is_decreasing)
+        distance_to_travel = prev_distance_to_travel = getDistance(x, y);
+        bool distance_is_decreasing = (prev_distance_to_travel - distance_to_travel) > -0.01;
+        // while (distance_to_travel > tolerance_move || distance_is_decreasing)
+        std::cout << "----------------------------------------------------------------"<< std::endl;
+        std::cout << "DISTANCE LEFT: " << distance_to_travel << std::endl;
+        std::cout << "DISTANCE PRE: " << prev_distance_to_travel<<std::endl;
+        std::cout << "Distance sub: " << (prev_distance_to_travel - distance_to_travel)<<std::endl;
+        std::cout << "DISTANCE is decreasing: " << distance_is_decreasing<<std::endl;
+        std::cout << "----------------------------------------------------------------"<< std::endl;
+        while (distance_is_decreasing)
         {
         cmd_msg.linear.x = kp_move * distance_to_travel;
         cmd_msg.linear.x = std::min(cmd_msg.linear.x, max_speed_move);
@@ -122,8 +133,13 @@
         move_rate.sleep();
         prev_distance_to_travel = distance_to_travel;
         distance_to_travel = getDistance(x, y);
-        distance_is_decreasing = (distance_to_travel - prev_distance_to_travel) < -0.01;
-        // std::cout << "0DISTANCE2 LEFT: " << distance_to_travel << " - " << robot_controller::Localization_x << " - " << robot_controller::Localization_y << std::endl;
+        distance_is_decreasing = (prev_distance_to_travel - distance_to_travel) > -0.01;
+        std::cout << "----------------------------------------------------------------"<< std::endl;
+        std::cout << "DISTANCE LEFT: " << distance_to_travel << std::endl;
+        std::cout << "DISTANCE PRE: " << prev_distance_to_travel<<std::endl;
+        std::cout << "Distance sub: " << (prev_distance_to_travel - distance_to_travel)<<std::endl;
+        std::cout << "DISTANCE is decreasing: " << distance_is_decreasing<<std::endl;
+        std::cout << "----------------------------------------------------------------"<< std::endl;
         }
         // std::cout << "DISTANCE2 LEFT: " << distance_to_travel << " - " << Localization_x << " - " << Localization_y << std::endl;
         cmd_msg.linear.x = 0;
@@ -184,4 +200,22 @@
         std::cout << "----------- GOAL DONE -----------" << std::endl;
         Path.erase(Path.begin());
         }
+    
+    }
+    
+    void robot_controller::info(){
+        std::cout << "----------- Robot Controller -----------" << std::endl;
+        std::tuple<double, double, double> temp = robot_controller::get_current_location();
+        std::cout << "X:     "<< std::get<0>(temp) << std::endl;
+        std::cout << "Y:     "<< std::get<1>(temp) << std::endl;
+        std::cout << "Theta: "<< std::get<2>(temp) * (180/M_PI) << u8"\u00B0" << std::endl;
+        std::cout << "********** Rotate information **********" << std::endl;
+        std::cout << "Maximmum speed: "<<  robot_controller::get_max_speed_rotate() * (180/M_PI) <<u8"\u00B0"<<"/s"<< std::endl;
+        std::cout << "Constant Kp:    "<<  robot_controller::get_kp_rotate() << std::endl;
+        std::cout << "Tolerance:      "<<  robot_controller::get_tolerance_rotate() * (180/M_PI) << u8"\u00B0" << std::endl;
+        std::cout << "*********** Move information ***********" << std::endl;
+        std::cout << "Maximmum speed: "<<  robot_controller::get_max_speed_move() <<"m/s"<< std::endl;
+        std::cout << "Constant Kp:    "<<  robot_controller::get_kp_move() << std::endl;
+        std::cout << "Tolerance:      "<<  robot_controller::get_tolerance_move() <<"m"<< std::endl;        
+        std::cout << "----------------------------------------" << std::endl;
     }

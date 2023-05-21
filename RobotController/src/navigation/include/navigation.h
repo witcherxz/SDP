@@ -23,7 +23,7 @@ public:
     void Print_Start_point();
     void Print_Goal_point();
     void Print_Path();
-
+    void info();
     Point get_Start_point();
     Point get_Goal_point();
     GridMap get_Map();

@@ -51,15 +51,19 @@ public:
     void set_kp_move(double kp);
     void set_kp_rotate(double kp);
 
+
     double get_max_speed_move();
     double get_max_speed_rotate();
     double get_tolerance_move();
     double get_tolerance_rotate();
     double get_kp_move();
     double get_kp_rotate();
+    std::tuple<double, double, double> get_current_location();
 
     void move(double x, double y);
     void rotate(double x, double y);
     void go_to_goal(std::vector<Point> Path);
+
+    void info();
 
 };

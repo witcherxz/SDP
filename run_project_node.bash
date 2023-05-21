@@ -29,12 +29,15 @@ if [[ $# -gt 0 ]]; then
   # Execute the corresponding action based on the provided argument
   case $1 in
     "build")
+      restart_nvargus_daemon
       build
       ;;
     "run")
+      restart_nvargus_daemon
       run
       ;;
     "build_run")
+      restart_nvargus_daemon
       build_run
       ;;
     *)
@@ -43,43 +46,45 @@ if [[ $# -gt 0 ]]; then
       ;;
   esac
 else
-  # Define the menu options
-  options=("Build localization" "Run localization node" "Build and run localization" "Quit")
+  # Check if the user provided input arguments
+  if [[ $# -eq 0 ]]; then
+    # Define the menu options
+    options=("Build localization" "Run localization node" "Build and run localization" "Quit")
 
-  # Loop until the user chooses to quit
-  while true; do
-    # Print the menu options
-    echo "Select an option:"
+    # Loop until the user chooses to quit
+    while true; do
+      # Print the menu options
+      echo "Select an option:"
 
-    # Use the select command to display the menu options and read the user's choice
-    select opt in "${options[@]}"; do
-      case $opt in
-        "Build localization")
-          restart_nvargus_daemon
-          build
-          break
-          ;;
-        "Run localization node")
-          restart_nvargus_daemon
-          run
-          break
-          ;;
-        "Build and run localization")
-          restart_nvargus_daemon
-          build_run
-          break
-          ;;
-        "Quit")
-          # User chose to quit
-          exit 0
-          ;;
-        *)
-          # Invalid choice, display an error message
-          echo "Invalid option. Try again."
-          break
-          ;;
-      esac
+      # Use the select command to display the menu options and read the user's choice
+      select opt in "${options[@]}"; do
+        case $opt in
+          "Build localization")
+            restart_nvargus_daemon
+            build
+            break
+            ;;
+          "Run localization node")
+            restart_nvargus_daemon
+            run
+            break
+            ;;
+          "Build and run localization")
+            restart_nvargus_daemon
+            build_run
+            break
+            ;;
+          "Quit")
+            # User chose to quit
+            exit 0
+            ;;
+          *)
+            # Invalid choice, display an error message
+            echo "Invalid option. Try again."
+            break
+            ;;
+        esac
+      done
     done
-  done
+  fi
 fi
-

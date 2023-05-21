@@ -63,12 +63,12 @@ double GridMap::getCellSize(){
     return cellSize;
 }
 
-std::tuple<double, double> GridMap::getDimensions(){
-    return std::make_tuple(width, height);
+std::tuple<int, int> GridMap::getDimensions(){
+    return std::make_tuple(map.rows, map.cols);
 }
 
 void GridMap::checkBounders(int r, int c){
-    assert(r >= 0 && r < width && c >= 0 && c < height);
+    assert(r >= 0 && r < width/cellSize && c >= 0 && c < height/cellSize);
 }
 
 void GridMap::occupyCell(int r, int c){

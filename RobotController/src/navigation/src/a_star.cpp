@@ -44,8 +44,8 @@ namespace std
 std::vector<Node> getNeighbors(Node currentNode, GridMap &map)
 {
   std::vector<Node> neighbors;
-  int w, h;
-  std::tie(w, h) = map.getDimensions();
+  int rows, cols;
+  std::tie(rows, cols) = map.getDimensions();
   // Get the current node's position on the grid map
   Point position = currentNode.position;
   int row, col;
@@ -56,7 +56,7 @@ std::vector<Node> getNeighbors(Node currentNode, GridMap &map)
     for (int j = col - 1; j <= col + 1; j++)
     {
       // Skip the current node itself
-      if (i == row && j == col || i < 0 || j < 0 || j > w - 1 || i > h - 1)
+      if (i == row && j == col || i < 0 || j < 0 || j > cols - 1 || i > rows - 1)
       {
         continue;
       }
@@ -116,7 +116,6 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
 {
   cv::Mat monitor(100, 100, CV_8UC3, cv::Scalar(255, 255, 255));
   cv::cvtColor(map.getMapCopy(), monitor, cv::COLOR_GRAY2BGR);
-
   // Initialize start node and add it to the open list
   Node startNode(start, 0, start.length(goal), nullptr);
   Node goalNode(goal, 0, 0, nullptr);
@@ -129,14 +128,12 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
   std::unordered_set<Node> closedList;
 
   // Loop until the goal is reached or the open list is empty
+
   while (!openList.empty())
   {
-
     Node currentNode = openList.top();
-
     openList.pop();
     openListSearch.erase(currentNode);
-
     closedList.insert(currentNode);
     markNodeClosed(currentNode, monitor);
     // Check if the goal has been reached
@@ -144,7 +141,6 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
     {
       double x, y;
       std::tie(x, y) = currentNode.position.getCoordinate();
-      // Construct the shortest path by backtracking through the chain of parent pointers
       std::vector<Point> path;
       Node *node = &currentNode;
       while (node != nullptr)
@@ -161,6 +157,7 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
     // std::cout << "current : "<< &currentNode << " | parent : " << currentNode.parent << std::endl;
     for (Node neighbor : neighbors)
     {
+
       double g = currentNode.g + currentNode.position.length(neighbor.position);
       double h = currentNode.h + currentNode.position.length(goal);
       double f = h + g;
@@ -178,11 +175,13 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
         neighbor.g = g;
         neighbor.f = g + neighbor.h;
         neighbor.parent = new Node(currentNode.position, currentNode.g, currentNode.h, currentNode.parent);
+
       }
 
       // If the neighbor is not on either list, add it to the open list and initialize its f, g, and h values
       if (!isOpen)
       {
+
         neighbor.g = g;
         neighbor.h = neighbor.position.length(goal);
         neighbor.f = neighbor.g + neighbor.h;
@@ -190,12 +189,15 @@ std::vector<Point> findShortestPath(Point &start, Point &goal, GridMap &map)
         openList.push(neighbor);
         openListSearch.insert(neighbor);
         markNodeOpen(neighbor, monitor);
+
       }
     }
     cv::Mat image_scaled;
-    cv::resize(monitor, image_scaled, cv::Size(), 2, 2, cv::INTER_LINEAR);
+
+    // cv::resize(monitor, image_scaled, cv::Size(), 2, 2, cv::INTER_LINEAR);
+
     // cv::imshow("Monitor", image_scaled);
-    int key = cv::waitKey(1);
+    // int key = cv::waitKey(1);
   }
 }
 

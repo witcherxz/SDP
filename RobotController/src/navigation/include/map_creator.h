@@ -10,7 +10,7 @@ private:
 public:
     MapCreator(GridMap map);
 
-    void addLine(Line line);
+    void addLine(Line line, int margin);
 };
 
 #endif // SDP_ROBOTVISION_MAPCREATOR_H

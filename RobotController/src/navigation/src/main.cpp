@@ -2,12 +2,12 @@
 #include "../include/Robot_controller.h"
 
 
-GridMap lab_Map = GridMap(15, 15, 0.4);
+GridMap lab_Map = GridMap(4, 4, 0.2);
 
-Line l1 = Line(Point(0, 1), Point(3,1));
-Line l2 = Line(Point(5,0), Point(5,4));
-Line l3 = Line(Point(2,4), Point(5,4));
-Line l4 = Line(Point(2,4), Point(2,6));
+Line l1 = Line(Point(0, 0.4), Point(1.2,0.4));
+Line l2 = Line(Point(2,0), Point(2,1.6));
+Line l3 = Line(Point(0.8,1.6), Point(2,1.6));
+Line l4 = Line(Point(0.8,1.6), Point(0.8,2.4));
 
 void show_menu(robot_controller &pioneer_p3dx, Navigation &navigation){
   navigation.info();
@@ -20,6 +20,7 @@ void show_menu(robot_controller &pioneer_p3dx, Navigation &navigation){
   std::cout<<"6- To Set The Tolerance (Move)"<<std::endl;
   std::cout<<"7- To Set The Tolerance (Rotate)"<<std::endl;
   std::cout<<"8- To Start the journey"<<std::endl;
+  std::cout<<"9- To Print the Path points"<<std::endl;
   
   int choice;
   std::cout << "Enter your choice: ";
@@ -102,9 +103,14 @@ void show_menu(robot_controller &pioneer_p3dx, Navigation &navigation){
 
     case 8:{
       std::cout << "The journey will start"<<std::endl;
-      std::tuple<double,double,double> start = pioneer_p3dx.get_current_location();
-      navigation.set_Start_point(Point(std::get<0>(start), std::get<1>(start)));
       pioneer_p3dx.go_to_goal(navigation.get_Shortest_Path());
+      break;
+  }
+      case 9:{
+      double wait;
+      navigation.get_Shortest_Path();
+      navigation.Print_Path();
+      std::cin >> wait;
       break;
   }
     default:
@@ -114,23 +120,42 @@ void show_menu(robot_controller &pioneer_p3dx, Navigation &navigation){
 
 }
 
+void web_requiests(int argc, char **argv, robot_controller &pioneer_p3dx, Navigation &navigation){
+  ros::spinOnce();
+  std::tuple<double,double,double> start = pioneer_p3dx.get_current_location();
+  double cellSize = lab_Map.getCellSize();
+  navigation.set_Start_point(Point(std::get<0>(start)/cellSize, std::get<1>(start)/cellSize));
+  navigation.set_Goal_point(Point(std::stoi(argv[1]), std::stoi(argv[2])));
+  std::cout << "The journey will start"<<std::endl;
+  pioneer_p3dx.go_to_goal(navigation.get_Shortest_Path());
+}
+
 int main(int argc, char **argv)
 {
   MapCreator a(lab_Map);
-  a.addLine(l1);
-  a.addLine(l2);
-  a.addLine(l3);
-  a.addLine(l4);
-  robot_controller pioneer_p3dx;
+  a.addLine(l1, 1);
+  a.addLine(l2, 1);
+  a.addLine(l3, 1);
+  a.addLine(l4, 1);
+
+  robot_controller pioneer_p3dx(lab_Map.getCellSize());
   Navigation navigation(lab_Map, Point(0,0), Point(0,0));
+  std::cout << lab_Map.getMapCopy() << "\n";
   ros::Duration(2.0).sleep();
+  if (argc == 3){
+    web_requiests(argc, argv, pioneer_p3dx, navigation);
+  }
+  else{
+  while(ros::ok()){
   ros::spinOnce();
   std::tuple<double,double,double> start = pioneer_p3dx.get_current_location();
-  navigation.set_Start_point(Point(std::get<0>(start), std::get<1>(start)));
-  while(ros::ok()){
+  double cellSize = lab_Map.getCellSize();
+  navigation.set_Start_point(Point(std::get<0>(start)/cellSize, std::get<1>(start)/cellSize));
   show_menu(pioneer_p3dx, navigation);
   std::cout << "\033[2J\033[1;1H";
+
   ros::spinOnce();
+  }
   }
   return 0;
 }

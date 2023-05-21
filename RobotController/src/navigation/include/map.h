@@ -71,7 +71,7 @@ public:
 
     double getCellSize();
 
-    std::tuple<double, double> getDimensions();
+    std::tuple<int, int> getDimensions();
 
     void occupyCell(int r, int c);
 

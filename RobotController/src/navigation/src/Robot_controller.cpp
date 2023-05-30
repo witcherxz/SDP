@@ -2,7 +2,7 @@
     double robot_controller::Localization_x = 0;
     double robot_controller::Localization_y = 0;
     double robot_controller::Localization_theta = 0;
-    robot_controller::robot_controller(){
+    robot_controller::robot_controller(double cellSize){
         //Instances 
         char **argv;
         int argc = 0;
@@ -15,10 +15,11 @@
         rate = 100;
         max_speed_move = 0.1;
         max_speed_rotate = 0.3;
-        tolerance_move = 0.05;
+        tolerance_move = 0.1;
         tolerance_rotate = 0.05;
         kp_move = 0.3;
         kp_rotate = 0.2;
+        this->cellSize = cellSize;
     }
     
     double robot_controller::getDistance(double x, double y){
@@ -47,12 +48,13 @@
     void robot_controller::objectFound(const std_msgs::Bool::ConstPtr &msg){
           if (msg->data)
             {
-            ROS_INFO("Received true");
+            ROS_INFO("Received true"); 
             }
             else
             {
             ROS_INFO("Received false");
             }
+        Object_Found.data = msg->data;
     }
     void robot_controller::localization(const geometry_msgs::Pose2D::ConstPtr &msg){
           robot_controller::Localization_x = msg->x;
@@ -110,38 +112,31 @@
         return std::make_tuple(robot_controller::Localization_x, robot_controller::Localization_y, robot_controller::Localization_theta);
     }
 
+void robot_controller::Object_check(){
+    ros::Rate object_rate(rate);
+    while(Object_Found.data){
+    cmd_msg.linear.x = 0;
+    cmd_msg.angular.z = 0;
+    RobotController.publish(cmd_msg);
+    ros::spinOnce();
+    object_rate.sleep();
+    }
+}
+
+
     void robot_controller::move(double x, double y){
         ros::Rate move_rate(rate);
-        double distance_to_travel = 0;
-        double prev_distance_to_travel = distance_to_travel;
-        distance_to_travel = prev_distance_to_travel = getDistance(x, y);
-        bool distance_is_decreasing = (prev_distance_to_travel - distance_to_travel) > -0.01;
         // while (distance_to_travel > tolerance_move || distance_is_decreasing)
-        std::cout << "----------------------------------------------------------------"<< std::endl;
-        std::cout << "DISTANCE LEFT: " << distance_to_travel << std::endl;
-        std::cout << "DISTANCE PRE: " << prev_distance_to_travel<<std::endl;
-        std::cout << "Distance sub: " << (prev_distance_to_travel - distance_to_travel)<<std::endl;
-        std::cout << "DISTANCE is decreasing: " << distance_is_decreasing<<std::endl;
-        std::cout << "----------------------------------------------------------------"<< std::endl;
-        while (distance_is_decreasing)
-        {
-        cmd_msg.linear.x = kp_move * distance_to_travel;
+        while (getDistance(x, y) > tolerance_move){
+        cmd_msg.linear.x = kp_move * getDistance(x, y);
         cmd_msg.linear.x = std::min(cmd_msg.linear.x, max_speed_move);
         cmd_msg.linear.x = std::max(cmd_msg.linear.x, -max_speed_move);
+        Object_check();
         RobotController.publish(cmd_msg);
         ros::spinOnce();
         move_rate.sleep();
-        prev_distance_to_travel = distance_to_travel;
-        distance_to_travel = getDistance(x, y);
-        distance_is_decreasing = (prev_distance_to_travel - distance_to_travel) > -0.01;
-        std::cout << "----------------------------------------------------------------"<< std::endl;
-        std::cout << "DISTANCE LEFT: " << distance_to_travel << std::endl;
-        std::cout << "DISTANCE PRE: " << prev_distance_to_travel<<std::endl;
-        std::cout << "Distance sub: " << (prev_distance_to_travel - distance_to_travel)<<std::endl;
-        std::cout << "DISTANCE is decreasing: " << distance_is_decreasing<<std::endl;
-        std::cout << "----------------------------------------------------------------"<< std::endl;
+        std::cout << "Distance Left: " << getDistance(x, y) << std::endl;
         }
-        // std::cout << "DISTANCE2 LEFT: " << distance_to_travel << " - " << Localization_x << " - " << Localization_y << std::endl;
         cmd_msg.linear.x = 0;
         RobotController.publish(cmd_msg);
         ros::spinOnce();
@@ -152,20 +147,15 @@
         while (std::abs(getOreintation(x, y)) > 0.05)
         {
         // Adjust angular velocity using proportional control
-        // std::cout << "ANGLE LEFT: " << getOreintation(x, y) * (180 / M_PI) << " - " << Localization_x << " - " << Localization_y << std::endl;
         cmd_msg.angular.z = kp_rotate * getOreintation(x, y);
-        
-
         // Limit maximum angular velocity to avoid overshooting
         cmd_msg.angular.z = std::min(cmd_msg.angular.z, max_speed_rotate);
         cmd_msg.angular.z = std::max(cmd_msg.angular.z, -max_speed_rotate);
-
-        // std::cout << "/* Anguler Speed */ : " << cmd_msg.angular.z << std::endl;
-        // Publish Twist message and update ROS
+        Object_check();
         RobotController.publish(cmd_msg);
         ros::spinOnce();
         rotation_rate.sleep();
-        ros::spinOnce();
+        // std::cout << "Rotation Left: " << getOreintation(x, y) * (180/M_PI) << std::endl;
         }
 
         // Stop the robot after rotation is complete
@@ -174,6 +164,38 @@
         ros::spinOnce();
         rotation_rate.sleep();
     }
+
+    void robot_controller::going_to_goal(double x, double y){
+        ros::Rate move_rate(rate);
+
+        while (getDistance(x,y) > tolerance_move)
+        {
+        cmd_msg.linear.x = kp_move * getDistance(x, y);
+        cmd_msg.linear.x = std::min(cmd_msg.linear.x, max_speed_move);
+        cmd_msg.linear.x = std::max(cmd_msg.linear.x, -max_speed_move);
+
+        // Adjust angular velocity using proportional control
+        cmd_msg.angular.z = kp_rotate * getOreintation(x, y);
+        cmd_msg.angular.z = std::min(cmd_msg.angular.z, max_speed_rotate);
+        cmd_msg.angular.z = std::max(cmd_msg.angular.z, -max_speed_rotate);
+        // Limit maximum angular velocity to avoid overshooting
+        
+        Object_check();
+        RobotController.publish(cmd_msg);
+        ros::spinOnce();
+        move_rate.sleep();
+        // std::cout << "Rotation Left: " << getOreintation(x, y) * (180/M_PI) << std::endl;
+        }
+        // Stop the robot after rotation is complete
+        cmd_msg.linear.x = 0;
+        cmd_msg.angular.z = 0;
+        RobotController.publish(cmd_msg);
+        ros::spinOnce();
+        move_rate.sleep();
+    }
+
+
+
     void robot_controller::go_to_goal(std::vector<Point> Path){
         ros::Rate rate(rate);
         // std::chrono::milliseconds duration(5000);
@@ -181,24 +203,16 @@
         std::cout << "PATH SIZE: "<< Path.size()<<"\n";
         while(!Path.empty()){
         std::cout << "----------- GOING TO GOAL -----------" << std::endl;
-        std::cout << "Goal(x, y): " << std::get<0>(Path.front().getCoordinate()) * 0.4 << ", " << std::get<1>(Path.front().getCoordinate()) * 0.4 << std::endl;
-        std::cout << "Rotation: " << getOreintation(std::get<0>(Path.front().getCoordinate())* 0.4, std::get<1>(Path.front().getCoordinate())* 0.4) * (180 / M_PI) << std::endl;
-        std::cout << "Distance: " << getDistance(std::get<0>(Path.front().getCoordinate())* 0.4, std::get<1>(Path.front().getCoordinate())* 0.4) << std::endl;
-        ros::spinOnce();
-        rate.sleep();
-        std::cout << "----------- Start Rotation -----------" << std::endl;
-        rotate(std::get<0>(Path.front().getCoordinate())*0.4, std::get<1>(Path.front().getCoordinate())*0.4);
-        std::cout << "----------- Rotation is Done -----------" << std::endl;
-        ros::spinOnce();
-        rate.sleep();
-        // std::this_thread::sleep_for(duration);
-        std::cout << "----------- Start Moving -----------" << std::endl;
-        move(std::get<0>(Path.front().getCoordinate())*0.4, std::get<1>(Path.front().getCoordinate())*0.4);
-        std::cout << "----------- Moving is Done -----------" << std::endl;
-        ros::spinOnce();
-        rate.sleep();
-        std::cout << "----------- GOAL DONE -----------" << std::endl;
+        std::cout << "Goal(x, y): " << std::get<0>(Path.front().getCoordinate()) * cellSize << ", " << std::get<1>(Path.front().getCoordinate()) * cellSize << std::endl;
+        std::cout << "Rotation: " << getOreintation(std::get<0>(Path.front().getCoordinate())* cellSize, std::get<1>(Path.front().getCoordinate())* cellSize) * (180 / M_PI) << std::endl;
+        std::cout << "Distance: " << getDistance(std::get<0>(Path.front().getCoordinate())* cellSize, std::get<1>(Path.front().getCoordinate())* cellSize) << std::endl;
+        std::cout << "----------- Going to Goal -----------" << std::endl;
+        rotate(std::get<0>(Path.front().getCoordinate())*cellSize, std::get<1>(Path.front().getCoordinate())*cellSize);
+        going_to_goal(std::get<0>(Path.front().getCoordinate())*cellSize, std::get<1>(Path.front().getCoordinate())*cellSize);
+        std::cout << "Distance left: " << getDistance(std::get<0>(Path.front().getCoordinate())* cellSize, std::get<1>(Path.front().getCoordinate())* cellSize) << std::endl;
         Path.erase(Path.begin());
+        ros::spinOnce();
+        rate.sleep();
         }
     
     }

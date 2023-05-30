@@ -139,9 +139,9 @@ cv::Mat Localization::getPostion()
     float filt_odom_theta =  fmod(disp_odom_theta + first_theta, 2*M_PI); 
     if(filt_odom_theta < 0 ) filt_odom_theta += 2*M_PI;
     float tfot = fmod(filt_odom_theta + angleOffset, 2 * M_PI);
-    std::cout << "  filt_odom_theta : " << filt_odom_theta * (180/M_PI)<< std::endl;
-    std::cout << "      disp_odom_theta : " << disp_odom_theta * (180 / M_PI) << std::endl;
-    std::cout << "      first_theta : " << first_theta * (180 / M_PI) << std::endl;
+    //std::cout << "  filt_odom_theta : " << filt_odom_theta * (180/M_PI)<< std::endl;
+    //std::cout << "      disp_odom_theta : " << disp_odom_theta * (180 / M_PI) << std::endl;
+    //std::cout << "      first_theta : " << first_theta * (180 / M_PI) << std::endl;
 
 
     if(poseFromMarker.at<float>(0, 0) != 0 && poseFromMarker.at<float>(0, 1) != 0){
@@ -158,7 +158,7 @@ cv::Mat Localization::getPostion()
         theta = marker_theta * angle_alpha + filt_odom_theta * (1 - angle_alpha);
         x += center * cos(theta);
         y += center * sin(theta);
-        std::cout << "  marker_theta : " << marker_theta * (180/M_PI)<< std::endl;
+        //std::cout << "  marker_theta : " << marker_theta * (180/M_PI)<< std::endl;
         if(firstTimeNewArucoDetected++ == 1){
             // firstTimeNewArucoDetected = true;
             first_x = marker_x;
@@ -175,7 +175,7 @@ cv::Mat Localization::getPostion()
         firstTimeNewArucoDetected = 0;
     }
     cv::Mat pose = (cv::Mat_<float>(1, 3) << x, y, theta);
-    std::cout << x << " " << y << " " << theta * (180 / M_PI) << "\n" ;
+    std::cout << "x : " << x << " cm, y : " << y  << " cm, angle (degree) : " << " " << theta * (180 / M_PI) << "\n" ;
     std::cout << "======================================\n";
     return pose;
 }

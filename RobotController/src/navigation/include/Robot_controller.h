@@ -21,6 +21,7 @@ protected:
     std_msgs::Bool Object_Found;
     
     int rate;
+    double cellSize;
     double max_speed_move;
     double max_speed_rotate;
     double tolerance_move;
@@ -33,7 +34,7 @@ public:
     static double Localization_x;
     static double Localization_y;
     static double Localization_theta;
-    robot_controller();
+    robot_controller(double cellSize);
     
     double getDistance(double x, double y);
     double getOreintation(double x, double y);
@@ -59,9 +60,10 @@ public:
     double get_kp_move();
     double get_kp_rotate();
     std::tuple<double, double, double> get_current_location();
-
+    void Object_check();
     void move(double x, double y);
     void rotate(double x, double y);
+    void going_to_goal(double x, double y);
     void go_to_goal(std::vector<Point> Path);
 
     void info();

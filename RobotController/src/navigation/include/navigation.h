@@ -12,6 +12,7 @@ protected:
     Point start;
     Point goal;
     std::vector<Point> Path;
+    double cellSize;
 
 public:
     Navigation(GridMap input_map, Point input_start, Point input_goal);

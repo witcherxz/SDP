@@ -44,3 +44,4 @@ logs/
 *.json
 !CMakePresets.json
 *.csv
+objectDetection/library/depthai-core

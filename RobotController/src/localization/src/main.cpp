@@ -38,25 +38,7 @@ void Odometer_Updatei(const tf2_msgs::TFMessage::ConstPtr &msg)
   double odom_x = msg->transforms[0].transform.translation.x;
   double odom_y = msg->transforms[0].transform.translation.y;
   std::cout << odom_x << "\n";
-
-  // std::cout << "TEST\n";
 }
-// int main(int argc, char **argv)
-// {
-
-//   // Localization loc = Localization();
-//   // loc.start(false);
-//   ros::init(argc, argv, "localization");
-//   ros::NodeHandle n;
-//   // this->publisher = n.advertise<geometry_msgs::Pose2D>("Location", 10);
-//   // ros::Rate rate(10);
-//   ros::Subscriber s = n.subscribe("/tf", 1, Odometer_Updatei);
-//   while(1){
-//     ros::spinOnce();
-//     // rate.sleep();
-//   }
-//   return 0;
-// }
 
 int main(int argc, char **argv)
 {

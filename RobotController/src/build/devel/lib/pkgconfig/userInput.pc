@@ -1,8 +1,0 @@
-prefix=/home/ceies/t05/catkin_ws/src/build/devel
-
-Name: userInput
-Description: Description of userInput
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

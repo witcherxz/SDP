@@ -42,7 +42,7 @@ To calibrate the camera use Matlab R2022b Computer Vision Toolbox and lanuch cal
 
 For calibration of the ArUco markers use `PoseCollection` helper class in localization node `localization/RobotVision/CameraCalibration/pose_collection` which can be used to collect the readings from the Aruco and provide the real measurements then the file is saved as a JSON file in default path you can modify it in `opencv_constans`.
 
-Using the collected data points file use `systemCalibration.py` file to get a leaner regression model for each ArUco marker
+Using the collected data points file use `systemCalibration.py` file to get a linear regression model for each ArUco marker
 And convert the model to a JSON file using the provided function in `systemCalibration.py` and save the JSON file [Example](https://gist.github.com/witcherxz/0372776ba00c3678fb78e050aca2defb) in the default path `Calibration_Folder/arucos_coef.json"` specified in `opencv_constans`.
 
 ---
